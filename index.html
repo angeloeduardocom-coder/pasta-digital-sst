@@ -278,9 +278,35 @@
     }
 
     /* ══════════════════ LAYOUT SPLIT ══════════════════ */
-    .split { display:flex; gap:16px; align-items:flex-start; }
-    .split-main  { flex:1; min-width:0; }
-    .split-side  { width:240px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; }
+    .split { display:flex; gap:0; align-items:flex-start; }
+    .split-main  { flex:1; min-width:0; margin-right:8px; }
+    .split-side  { width:240px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; margin-left:8px; }
+
+    /* ══════════════════ RESIZE HANDLES ══════════════════ */
+    .split-handle {
+      width:8px; flex-shrink:0; align-self:stretch; cursor:col-resize;
+      position:relative; border-radius:4px; transition:background .2s;
+      user-select:none; -webkit-user-select:none;
+    }
+    .split-handle::after {
+      content:''; position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:2px; height:44px; background:var(--border);
+      border-radius:2px; transition:all .2s;
+    }
+    .split-handle:hover::after, .split-handle.dragging::after {
+      background:var(--primary); height:60px;
+    }
+    .split-handle:hover, .split-handle.dragging {
+      background:rgba(79,70,229,.06);
+    }
+
+    .sb-resize {
+      position:absolute; right:-3px; top:0; bottom:0; width:6px;
+      cursor:col-resize; z-index:20; transition:background .2s;
+      user-select:none; -webkit-user-select:none;
+    }
+    .sb-resize:hover, .sb-resize.dragging { background:rgba(79,70,229,.35); }
 
     /* ══════════════════ TABLE CARD ══════════════════ */
     .tcard {
@@ -680,6 +706,68 @@
       white-space: nowrap;
     }
 
+    /* ══════════════════ EMPLOYEE PICKER ══════════════════ */
+    .emp-picker {
+      max-height:150px; overflow-y:auto;
+      border:1.5px solid var(--border); border-radius:9px; padding:4px;
+    }
+    .emp-picker:focus-within { border-color:var(--primary); }
+    .emp-check {
+      display:flex; align-items:center; gap:9px;
+      padding:7px 10px; border-radius:7px; cursor:pointer;
+      font-size:13.5px; color:var(--t1); transition:background .12s;
+      user-select:none; -webkit-user-select:none;
+    }
+    .emp-check:hover { background:var(--primary-l); }
+    .emp-check input[type=checkbox] { width:15px; height:15px; accent-color:var(--primary); flex-shrink:0; cursor:pointer; }
+    .emp-check .ec-sub { font-size:11px; color:var(--t3); margin-top:1px; }
+    .emp-count { font-size:11.5px; color:var(--t3); margin-top:5px; }
+
+    /* ══════════════════ TRAINING DETAIL MODAL ══════════════════ */
+    .td-info-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+    .td-badge { background:var(--primary-l); color:var(--primary); padding:5px 12px; border-radius:8px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:5px; }
+    .td-section { font-size:11px; font-weight:700; color:var(--t3); text-transform:uppercase; letter-spacing:.7px; margin-bottom:10px; }
+    .td-table { width:100%; border-collapse:collapse; border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); }
+    .td-table thead th { padding:9px 14px; font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; background:#FAFBFD; text-align:left; }
+    .td-table tbody tr { border-top:1px solid #F1F5F9; }
+    .td-table tbody td { padding:10px 14px; font-size:13.5px; color:var(--t1); }
+    .td-empty { text-align:center; padding:28px 20px; color:var(--t3); font-size:13.5px; }
+
+    /* Clickable rows */
+    .tbl-clickable tbody tr { cursor:pointer; }
+    .tbl-clickable tbody tr:hover { background:#F0F4FF !important; }
+
+    /* ══════════════════ TRAINING DETAIL PAGE ══════════════════ */
+    .btn-back {
+      display:inline-flex; align-items:center; gap:7px;
+      background:none; border:1.5px solid var(--border);
+      padding:9px 16px; border-radius:9px; font-size:13px;
+      font-weight:600; color:var(--t2); cursor:pointer;
+      font-family:inherit; transition:all .15s;
+    }
+    .btn-back:hover { background:#F8FAFC; border-color:var(--t3); color:var(--t1); }
+
+    .detail-meta {
+      display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px;
+    }
+    .detail-meta-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); padding:14px 20px;
+      display:flex; flex-direction:column; gap:3px; min-width:130px;
+    }
+    .dmc-label { font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; }
+    .dmc-val   { font-size:17px; font-weight:800; color:var(--t1); letter-spacing:-.4px; }
+
+    .emp-row { cursor:pointer; transition:background .12s; }
+    .emp-row:hover { background:#F0F4FF !important; }
+    .emp-row:hover td:last-child { color:var(--primary) !important; }
+
+    .detail-empty {
+      text-align:center; padding:80px 20px; color:var(--t3);
+    }
+    .detail-empty i { font-size:48px; opacity:.25; display:block; margin-bottom:16px; }
+    .detail-empty p { font-size:15px; line-height:1.7; }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
@@ -690,7 +778,8 @@
 <body>
 
 <!-- ══ SIDEBAR ══ -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
+  <div class="sb-resize" id="sb-resize"></div>
   <div class="sb-logo">
     <div class="sb-icon"><i class="fa-solid fa-shield-halved"></i></div>
     <div class="sb-brand">
@@ -708,8 +797,8 @@
     <div class="nav-item" onclick="go('treinamentos',this)">
       <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Treinamentos
     </div>
-    <div class="nav-item" onclick="go('exames',this)">
-      <span class="nav-icon"><i class="fa-solid fa-stethoscope"></i></span> ASO / Exames
+    <div class="nav-item" onclick="go('extintores',this)">
+      <span class="nav-icon"><i class="fa-solid fa-fire-extinguisher"></i></span> Extintores
     </div>
 
     <div class="sb-section">Cadastros</div>
@@ -747,6 +836,7 @@
     <div class="page-body">
       <div class="cards-row dash-5" id="dash-cards"></div>
       <div id="dash-alerts"></div>
+      <div id="dash-ext-alerta"></div>
 
       <div class="dash-charts-grid">
         <div class="chart-card">
@@ -754,8 +844,8 @@
           <canvas id="dash-ct" height="110"></canvas>
         </div>
         <div class="chart-card">
-          <h4>Exames por Situação</h4>
-          <canvas id="dash-ce" height="110"></canvas>
+          <h4>Extintores por Situação</h4>
+          <canvas id="dash-cex" height="110"></canvas>
         </div>
         <div class="chart-card">
           <h4>Funcionários por Status</h4>
@@ -774,12 +864,41 @@
             <table class="vt" id="dash-vencer"></table>
           </div>
         </div>
+        <div class="split-handle" data-split="inicio"></div>
         <div class="split-side">
           <div class="chart-card">
             <h4>📊 Resumo Geral</h4>
             <div id="dash-resumo"></div>
           </div>
         </div>
+      </div>
+
+      <div class="tcard" style="margin-top:16px" id="dash-colab-section">
+        <div class="tcard-toolbar">
+          <h3>⚠️ Colaboradores com Treinamentos Pendentes</h3>
+          <span id="dash-colab-cnt" class="badge b-exp" style="display:none"></span>
+        </div>
+        <div class="table-scroll">
+          <table id="dash-colab-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Colaborador</th>
+                <th>Cargo</th>
+                <th>Setor</th>
+                <th>Treinamento</th>
+                <th>Situação</th>
+                <th>Vencimento</th>
+              </tr>
+            </thead>
+            <tbody id="dash-colab-tbody"></tbody>
+          </table>
+        </div>
+        <div id="dash-colab-empty" class="empty" style="display:none">
+          <span class="ei"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i></span>
+          <p><strong>Tudo em dia!</strong><br>Nenhum colaborador com treinamento vencido ou vencendo.</p>
+        </div>
+        <div class="tfoot"><span id="dash-colab-footer">—</span></div>
       </div>
     </div>
   </div>
@@ -796,7 +915,7 @@
     <div class="page-body">
       <div class="cards-row" id="t-cards"></div>
       <div class="split">
-        <div class="split-main">
+        <div class="split-main" id="t-split-main">
           <div class="tcard">
             <div class="tcard-toolbar">
               <h3>Lista de Treinamentos</h3>
@@ -822,7 +941,8 @@
             <div class="tfoot"><span id="t-cnt">0 registros</span></div>
           </div>
         </div>
-        <div class="split-side">
+        <div class="split-handle" data-split="treinamentos"></div>
+        <div class="split-side" id="t-split-side">
           <div class="chart-card">
             <h4>Treinamentos por Status</h4>
             <canvas id="chart-ts" height="170"></canvas>
@@ -879,7 +999,8 @@
             <div class="tfoot"><span id="e-cnt">0 registros</span></div>
           </div>
         </div>
-        <div class="split-side">
+        <div class="split-handle" data-split="exames"></div>
+        <div class="split-side" id="e-split-side">
           <div class="chart-card">
             <h4>Exames por Situação</h4>
             <canvas id="chart-es" height="170"></canvas>
@@ -891,6 +1012,46 @@
             </table>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EXTINTORES ── -->
+  <div id="page-extintores" class="page">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>Extintores</h2>
+        <div class="sub">Controle de extintores de incêndio</div>
+      </div>
+      <button class="btn-primary" onclick="openModal('extintor')"><i class="fa-solid fa-plus"></i> Novo Extintor</button>
+    </div>
+    <div class="page-body">
+      <div class="cards-row" id="ex-cards"></div>
+      <div class="tcard">
+        <div class="tcard-toolbar">
+          <h3>Lista de Extintores</h3>
+          <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar por local ou tipo..." oninput="renderEx(this.value)"/></div>
+          <select class="flt" id="ex-fs" onchange="renderEx()">
+            <option value="">Todos os status</option>
+            <option>Em dia</option><option>Vencendo</option><option>Vencido</option>
+          </select>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Identificação</th><th>Tipo</th><th>Capacidade</th>
+                <th>Localização</th><th>Última Recarga</th><th>Próxima Recarga</th><th>Situação</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-ex"></tbody>
+          </table>
+        </div>
+        <div id="empty-ex" class="empty" style="display:none">
+          <span class="ei"><i class="fa-solid fa-fire-extinguisher"></i></span>
+          <p>Nenhum extintor cadastrado.<br>Clique em <strong>+ Novo Extintor</strong> para começar.</p>
+        </div>
+        <div class="tfoot"><span id="ex-cnt">0 registros</span></div>
       </div>
     </div>
   </div>
@@ -971,6 +1132,47 @@
     </div>
   </div>
 
+  <!-- ── DETALHE TREINAMENTO ── -->
+  <div id="page-treinamento-detalhe" class="page">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2 id="td-page-nome">Treinamento</h2>
+        <div class="sub" id="td-page-sub">Participantes do treinamento</div>
+      </div>
+      <button class="btn-back" onclick="voltarTreinamentos()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+    </div>
+    <div class="page-body">
+      <div class="detail-meta" id="td-page-meta"></div>
+      <div class="tcard">
+        <div class="tcard-toolbar">
+          <h3>Colaboradores Participantes</h3>
+          <div class="search-box">
+            <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="text" placeholder="Buscar colaborador..." oninput="filterDetailEmps(this.value)"/>
+          </div>
+        </div>
+        <table id="td-page-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Cargo</th>
+              <th>Setor</th>
+              <th>Admissão</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="td-page-tbody"></tbody>
+        </table>
+        <div id="td-page-empty" class="detail-empty" style="display:none">
+          <i class="fa-solid fa-users"></i>
+          <p>Nenhum colaborador vinculado a este treinamento.<br>Edite o treinamento para adicionar participantes.</p>
+        </div>
+        <div class="tfoot"><span id="td-page-cnt">0 participantes</span></div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /main -->
 
 <!-- ══ MODAIS ══ -->
@@ -1012,9 +1214,15 @@
         <label>Status</label>
         <select id="t-stat"><option>Concluído</option><option>Agendado</option><option>Em Andamento</option><option>Vencido</option></select>
       </div>
-      <div class="field"><label>Participantes</label><input type="number" id="t-part" min="0" placeholder="0"/></div>
+      <div class="field"><label>Carga Horária (h)</label><input type="number" id="t-ch" min="0" placeholder="0"/></div>
     </div>
-    <div class="field"><label>Carga Horária (h)</label><input type="number" id="t-ch" min="0" placeholder="0"/></div>
+    <div class="field">
+      <label>Participantes</label>
+      <div class="emp-picker" id="t-emp-picker">
+        <div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div>
+      </div>
+      <div class="emp-count" id="t-emp-count">0 selecionados</div>
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('treinamento')">Cancelar</button>
       <button class="btn-save" onclick="saveT()">Salvar Registro</button>
@@ -1048,9 +1256,50 @@
   </div>
 </div>
 
+<div class="overlay" id="modal-extintor">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-fire-extinguisher"></i></div> Novo Extintor</div>
+    <div class="frow">
+      <div class="field"><label>Identificação / Nº</label><input type="text" id="ex-id" placeholder="Ex: EXT-01"/></div>
+      <div class="field">
+        <label>Tipo</label>
+        <select id="ex-tipo">
+          <option>Pó Químico Seco (ABC)</option>
+          <option>Pó Químico Seco (BC)</option>
+          <option>CO² (Dióxido de Carbono)</option>
+          <option>Água Pressurizada</option>
+          <option>Espuma Mecânica</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="field">
+        <label>Capacidade</label>
+        <select id="ex-cap">
+          <option>1 kg</option><option>2 kg</option><option>4 kg</option>
+          <option>6 kg</option><option>8 kg</option><option>10 kg</option>
+          <option>12 kg</option><option>10 L</option><option>20 L</option>
+          <option>50 L</option>
+        </select>
+      </div>
+      <div class="field"><label>Localização</label><input type="text" id="ex-local" placeholder="Ex: Corredor Bloco A"/></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Última Recarga</label><input type="date" id="ex-ult"/></div>
+      <div class="field"><label>Próxima Recarga</label><input type="date" id="ex-prox"/></div>
+    </div>
+    <div class="field"><label>Observação</label><input type="text" id="ex-obs" placeholder="Anotações relevantes"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('extintor')">Cancelar</button>
+      <button class="btn-save" onclick="saveEx()">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="modal-funcionario">
   <div class="modal">
-    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-user-plus"></i></div> Novo Funcionário</div>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-user-pen"></i></div> <span id="f-modal-title">Novo Funcionário</span></div>
+    <input type="hidden" id="f-edit-id"/>
     <div class="field"><label>Nome Completo</label><input type="text" id="f-nome" placeholder="Nome completo"/></div>
     <div class="frow">
       <div class="field"><label>Cargo</label><input type="text" id="f-cargo" placeholder="Ex: Soldador"/></div>
@@ -1119,7 +1368,7 @@ const DB = {
   get: k => { try { return JSON.parse(localStorage.getItem(k))||[]; } catch { return []; } },
   set: (k,v) => localStorage.setItem(k, JSON.stringify(v))
 };
-const K = { T:'sst_t2', E:'sst_e2', F:'sst_f2', I:'sst_i2', AC:'sst_ac2' };
+const K = { T:'sst_t2', E:'sst_e2', F:'sst_f2', I:'sst_i2', AC:'sst_ac2', EX:'sst_ex1' };
 const charts = {};
 
 function fmt(d) {
@@ -1176,7 +1425,77 @@ function go(page, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   el.classList.add('active');
-  ({ inicio:renderInicio, treinamentos:renderT, exames:renderE, funcionarios:renderF, inspecoes:() => { renderI(); renderAc(); } })[page]();
+  ({ inicio:renderInicio, treinamentos:renderT, exames:renderE, extintores:renderEx, funcionarios:renderF, inspecoes:() => { renderI(); renderAc(); } })[page]();
+}
+
+// ── EXTINTORES ──
+function renderEx(search='') {
+  const all = DB.get(K.EX);
+  const fs  = document.getElementById('ex-fs')?.value || '';
+  const list = all.filter(r => {
+    const sit = sitEx(r.prox);
+    const label = { ok:'Em dia', alert:'Vencendo', exp:'Vencido' }[sit];
+    return (r.id_num+r.tipo+r.local).toLowerCase().includes(search.toLowerCase())
+      && (!fs || label === fs);
+  });
+
+  const ok    = all.filter(r => sitEx(r.prox) === 'ok').length;
+  const alert = all.filter(r => sitEx(r.prox) === 'alert').length;
+  const venc  = all.filter(r => sitEx(r.prox) === 'exp').length;
+  const tot   = all.length;
+
+  document.getElementById('ex-cards').innerHTML = `
+    <div class="stat-card">${ring(tot,tot||1,'#4F46E5')}<div><div class="stat-lbl">Total</div><div class="stat-val">${tot}</div><div class="stat-pct">extintores</div></div></div>
+    <div class="stat-card">${ring(ok,tot||1,'#10B981')}<div><div class="stat-lbl">Em Dia</div><div class="stat-val">${ok}</div><div class="stat-pct">dentro do prazo</div></div></div>
+    <div class="stat-card">${ring(alert,tot||1,'#F59E0B')}<div><div class="stat-lbl">Vencendo</div><div class="stat-val">${alert}</div><div class="stat-pct">próximos 30 dias</div></div></div>
+    <div class="stat-card">${ring(venc,tot||1,'#EF4444')}<div><div class="stat-lbl">Vencidos</div><div class="stat-val">${venc}</div><div class="stat-pct">recarga necessária</div></div></div>`;
+
+  const tbody = document.getElementById('tbody-ex');
+  const empty = document.getElementById('empty-ex');
+  document.getElementById('ex-cnt').textContent = `${list.length} registros`;
+
+  if (!list.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  const sb = { ok:'b-ok', alert:'b-alert', exp:'b-exp' };
+  const sl = { ok:'Em dia', alert:'Vencendo', exp:'Vencido' };
+  tbody.innerHTML = list.map((r,i) => {
+    const s = sitEx(r.prox);
+    return `<tr>
+      <td><div class="rn">${String(i+1).padStart(2,'0')}</div></td>
+      <td><strong style="font-weight:700">${r.id_num}</strong></td>
+      <td style="color:var(--t2)">${r.tipo}</td>
+      <td style="color:var(--t2)">${r.cap}</td>
+      <td style="color:var(--t2)">${r.local||'—'}</td>
+      <td style="color:var(--t2)">${fmt(r.ult)}</td>
+      <td style="color:var(--t2)">${fmt(r.prox)}</td>
+      <td><span class="badge ${sb[s]}"><span class="dot"></span>${sl[s]}</span></td>
+      <td><button class="ab" onclick="delEx(${r.id})" title="Remover"><i class="fa-solid fa-trash-can"></i></button></td>
+    </tr>`;
+  }).join('');
+}
+
+function sitEx(prox) {
+  if (!prox) return 'ok';
+  const diff = (new Date(prox) - new Date()) / 86400000;
+  return diff < 0 ? 'exp' : diff <= 30 ? 'alert' : 'ok';
+}
+
+function saveEx() {
+  const id_num = document.getElementById('ex-id').value.trim();
+  const local  = document.getElementById('ex-local').value.trim();
+  const prox   = document.getElementById('ex-prox').value;
+  if (!id_num || !prox) { alert('Preencha a identificação e a próxima recarga.'); return; }
+  const list = DB.get(K.EX);
+  list.push({ id:Date.now(), id_num, tipo:document.getElementById('ex-tipo').value, cap:document.getElementById('ex-cap').value, local, ult:document.getElementById('ex-ult').value, prox, obs:document.getElementById('ex-obs').value });
+  DB.set(K.EX, list);
+  closeModal('extintor');
+  renderEx();
+}
+
+function delEx(id) {
+  if (!confirm('Remover este extintor?')) return;
+  DB.set(K.EX, DB.get(K.EX).filter(r => r.id !== id));
+  renderEx();
 }
 
 // ── INÍCIO / DASHBOARD ──
@@ -1186,6 +1505,7 @@ function renderInicio() {
   const F  = DB.get(K.F);
   const I  = DB.get(K.I);
   const AC = DB.get(K.AC);
+  const EX = DB.get(K.EX);
 
   const dias = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
   const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
@@ -1205,7 +1525,11 @@ function renderInicio() {
   const eVenc   = E.filter(r => svenc(r.venc) === 'exp').length;
   const iTot    = I.length;
   const acTot   = AC.length;
-  const alertas = tVenc + eVenc + eAlert;
+  const exTot   = EX.length;
+  const exOk    = EX.filter(r => sitEx(r.prox) === 'ok').length;
+  const exAlert = EX.filter(r => sitEx(r.prox) === 'alert').length;
+  const exVenc  = EX.filter(r => sitEx(r.prox) === 'exp').length;
+  const alertas = tVenc + eVenc + eAlert + exVenc + exAlert;
 
   document.getElementById('dash-cards').innerHTML = `
     <div class="stat-card">
@@ -1215,8 +1539,8 @@ function renderInicio() {
     <div class="stat-card">${ring(tConc, tTot||1, '#10B981')}
       <div><div class="stat-lbl">Treinamentos</div><div class="stat-val">${tTot}</div><div class="stat-pct">${tVenc > 0 ? `${tVenc} vencido${tVenc>1?'s':''}` : 'tudo em dia'}</div></div>
     </div>
-    <div class="stat-card">${ring(eOk, eTot||1, '#3B82F6')}
-      <div><div class="stat-lbl">Exames</div><div class="stat-val">${eTot}</div><div class="stat-pct">${eVenc > 0 ? `${eVenc} vencido${eVenc>1?'s':''}` : 'tudo em dia'}</div></div>
+    <div class="stat-card">${ring(exOk, exTot||1, '#F97316')}
+      <div><div class="stat-lbl">Extintores</div><div class="stat-val">${exTot}</div><div class="stat-pct">${exVenc > 0 ? `${exVenc} vencido${exVenc>1?'s':''}` : exAlert > 0 ? `${exAlert} vencendo` : 'tudo em dia'}</div></div>
     </div>
     <div class="stat-card">
       <div class="icon-card" style="background:#ECFDF5"><i class="fa-solid fa-magnifying-glass" style="color:#10B981"></i></div>
@@ -1245,8 +1569,30 @@ function renderInicio() {
       </div>`
     : '';
 
-  donut('dash-ct', ['Concluído','Agendado','Em Andamento','Vencido'], [tConc,tAg,tEm,tVenc], ['#10B981','#8B5CF6','#3B82F6','#EF4444']);
-  donut('dash-ce', ['Em Dia','Vencendo','Vencido'], [eOk,eAlert,eVenc], ['#10B981','#F59E0B','#EF4444']);
+  donut('dash-ct',  ['Concluído','Agendado','Em Andamento','Vencido'], [tConc,tAg,tEm,tVenc], ['#10B981','#8B5CF6','#3B82F6','#EF4444']);
+  donut('dash-cex', ['Em Dia','Vencendo','Vencido'], [exOk,exAlert,exVenc], ['#10B981','#F59E0B','#EF4444']);
+
+  // notificação de extintores
+  const extAlertEl = document.getElementById('dash-ext-alerta');
+  const extProbs = [
+    ...EX.filter(r => sitEx(r.prox) === 'exp').map(r => ({ label:`${r.id_num} – ${r.local||r.tipo} (Vencido)`, cls:'b-exp' })),
+    ...EX.filter(r => sitEx(r.prox) === 'alert').map(r => ({ label:`${r.id_num} – ${r.local||r.tipo} (Vencendo ${fmt(r.prox)})`, cls:'b-alert' })),
+  ];
+  if (extProbs.length) {
+    extAlertEl.innerHTML = `<div class="dash-alert-banner" style="background:#FFF1F2;border-color:#FECDD3;margin-bottom:12px">
+      <span class="ban-icon"><i class="fa-solid fa-fire-extinguisher" style="color:#E11D48"></i></span>
+      <div>
+        <div class="ban-title" style="color:#9F1239">${extProbs.length} extintor${extProbs.length>1?'es':''} com situação irregular</div>
+        <div class="ban-sub" style="color:#BE123C">Verifique os extintores vencidos ou próximos do vencimento</div>
+      </div>
+      <div class="dash-alert-strip" style="margin:0;flex:1;justify-content:flex-end">
+        ${extProbs.slice(0,5).map(a=>`<span class="badge ${a.cls}"><span class="dot"></span>${a.label}</span>`).join('')}
+        ${extProbs.length>5?`<span class="badge b-alert"><span class="dot"></span>+${extProbs.length-5} mais</span>`:''}
+      </div>
+    </div>`;
+  } else {
+    extAlertEl.innerHTML = '';
+  }
 
   const fAtivo2  = F.filter(f => f.status === 'Ativo').length;
   const fAfas    = F.filter(f => f.status === 'Afastado').length;
@@ -1266,6 +1612,50 @@ function renderInicio() {
     ? pv.slice(0,8).map(r => `<tr><td><span style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;display:block">${r.tipo}</span>${r.nome}</td><td>${fmt(r.data)}</td></tr>`).join('')
     : '<tr><td colspan="2" style="color:var(--t3);text-align:center;padding:18px 0;font-size:12.5px">Nenhum nos próximos 30 dias</td></tr>';
 
+  // ── COLABORADORES COM TREINAMENTOS PENDENTES ──
+  const pendentes = [];
+  T.forEach(t => {
+    const sit = t.status === 'Vencido' ? 'vencido'
+               : (t.prox && svenc(t.prox) === 'alert') ? 'vencendo'
+               : (t.status === 'Atrasado') ? 'atrasado'
+               : null;
+    if (!sit) return;
+    const funcsT = (t.funcs||[]).map(fid => F.find(f => f.id === fid)).filter(Boolean);
+    funcsT.forEach(f => pendentes.push({ func: f, treinamento: t.nome, sit, prox: t.prox }));
+  });
+
+  // ordena: vencido primeiro, depois vencendo
+  const ordemSit = { vencido:0, atrasado:1, vencendo:2 };
+  pendentes.sort((a,b) => ordemSit[a.sit] - ordemSit[b.sit] || new Date(a.prox||0) - new Date(b.prox||0));
+
+  const cntEl   = document.getElementById('dash-colab-cnt');
+  const tbody   = document.getElementById('dash-colab-tbody');
+  const empty   = document.getElementById('dash-colab-empty');
+  const footer  = document.getElementById('dash-colab-footer');
+
+  if (!pendentes.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    cntEl.style.display = 'none';
+    footer.textContent = 'Nenhuma pendência';
+  } else {
+    empty.style.display = 'none';
+    cntEl.style.display = 'inline-flex';
+    cntEl.innerHTML = `<span class="dot"></span>${pendentes.length} pendência${pendentes.length!==1?'s':''}`;
+    footer.textContent = `${pendentes.length} registro${pendentes.length!==1?'s':''}`;
+    const sitBadge = { vencido:'b-exp', vencendo:'b-alert', atrasado:'b-exp' };
+    const sitLabel = { vencido:'Vencido', vencendo:'Vencendo', atrasado:'Atrasado' };
+    tbody.innerHTML = pendentes.map((p,i) => `<tr>
+      <td><div class="rn">${String(i+1).padStart(2,'0')}</div></td>
+      <td><strong style="font-weight:600">${p.func.nome}</strong></td>
+      <td style="color:var(--t2)">${p.func.cargo||'—'}</td>
+      <td style="color:var(--t2)">${p.func.setor||'—'}</td>
+      <td style="color:var(--t1)">${p.treinamento}</td>
+      <td><span class="badge ${sitBadge[p.sit]}"><span class="dot"></span>${sitLabel[p.sit]}</span></td>
+      <td style="color:var(--t2);font-weight:500">${fmt(p.prox)}</td>
+    </tr>`).join('');
+  }
+
   document.getElementById('dash-resumo').innerHTML = [
     { label:'Funcionários ativos', val: fAtivos > 0 ? `${fAtivos} / ${F.length}` : '—', cls: fAtivos > 0 ? 'ok' : '' },
     { label:'Treinamentos concluídos', val: tTot > 0 ? `${tConc} / ${tTot}` : '—', cls: tVenc > 0 ? 'bad' : tConc > 0 ? 'ok' : '' },
@@ -1276,12 +1666,49 @@ function renderInicio() {
 }
 
 function openModal(tipo) {
-  const fs = DB.get(K.F).map(f=>f.nome);
+  const fList = DB.get(K.F);
+  // datalist para exames e acidentes
   ['fl-e','fl-ac'].forEach(id => {
     const dl = document.getElementById(id);
-    if (dl) dl.innerHTML = fs.map(n=>`<option value="${n}">`).join('');
+    if (dl) dl.innerHTML = fList.map(f=>`<option value="${f.nome}">`).join('');
   });
+  // reset modal funcionario ao abrir como novo
+  if (tipo === 'funcionario') {
+    document.getElementById('f-modal-title').textContent = 'Novo Funcionário';
+    document.getElementById('f-edit-id').value = '';
+    document.getElementById('f-nome').value  = '';
+    document.getElementById('f-cargo').value = '';
+    document.getElementById('f-setor').value = '';
+    document.getElementById('f-adm').value   = '';
+    document.getElementById('f-stat').value  = 'Ativo';
+  }
+
+  // seletor de funcionários no modal de treinamento
+  if (tipo === 'treinamento') {
+    const picker = document.getElementById('t-emp-picker');
+    if (picker) {
+      if (!fList.length) {
+        picker.innerHTML = '<div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div>';
+      } else {
+        picker.innerHTML = fList.map(f => `
+          <label class="emp-check">
+            <input type="checkbox" value="${f.id}" onchange="updateEmpCount()">
+            <div>
+              <div>${f.nome}</div>
+              <div class="ec-sub">${[f.cargo, f.setor].filter(Boolean).join(' · ')}</div>
+            </div>
+          </label>`).join('');
+      }
+      updateEmpCount();
+    }
+  }
   document.getElementById('modal-'+tipo).classList.add('open');
+}
+
+function updateEmpCount() {
+  const n = document.querySelectorAll('#t-emp-picker input:checked').length;
+  const el = document.getElementById('t-emp-count');
+  if (el) el.textContent = n + ' selecionado' + (n !== 1 ? 's' : '');
 }
 
 function closeModal(tipo) { document.getElementById('modal-'+tipo).classList.remove('open'); }
@@ -1315,18 +1742,21 @@ function renderT(search='') {
   const catCls = { NR:'cNR', SST:'cSST', Operacional:'cOp', 'Emergência':'cEm' };
   const stCls  = { 'Concluído':'b-ok', 'Agendado':'b-sched', 'Em Andamento':'b-prog', 'Vencido':'b-exp' };
 
+  const tbl = document.querySelector('#page-treinamentos table');
+  if (tbl) tbl.classList.add('tbl-clickable');
+
   if (!list.length) { tbody.innerHTML=''; empty.style.display='block'; }
   else {
     empty.style.display='none';
-    tbody.innerHTML = list.map((r,i) => `<tr>
+    tbody.innerHTML = list.map((r,i) => `<tr onclick="openTrainingDetail(${r.id})">
       <td><div class="rn">${String(i+1).padStart(2,'0')}</div></td>
       <td><strong style="font-weight:600">${r.nome}</strong></td>
       <td><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></td>
       <td style="color:var(--t2)">${fmt(r.ult)}</td>
       <td style="color:var(--t2)">${fmt(r.prox)}</td>
       <td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td>
-      <td style="color:var(--t2)">${r.part||0}</td>
-      <td><button class="ab" onclick="delT(${r.id})" title="Remover"><i class="fa-solid fa-trash-can"></i></button></td>
+      <td style="color:var(--t2)">${(r.funcs||[]).length || r.part || 0}</td>
+      <td><button class="ab" onclick="event.stopPropagation();delT(${r.id})" title="Remover"><i class="fa-solid fa-trash-can"></i></button></td>
     </tr>`).join('');
   }
 
@@ -1347,8 +1777,9 @@ function saveT() {
   const nome = nv==='Outro' ? document.getElementById('t-outro').value.trim() : nv;
   const ult  = document.getElementById('t-ult').value;
   if (!nome||!ult) { alert('Preencha o nome e a data de realização.'); return; }
+  const funcs = [...document.querySelectorAll('#t-emp-picker input:checked')].map(cb => +cb.value);
   const list = DB.get(K.T);
-  list.push({ id:Date.now(), nome, cat:document.getElementById('t-cat').value, per:document.getElementById('t-per').value, ult, prox:document.getElementById('t-prox').value, status:document.getElementById('t-stat').value, part:document.getElementById('t-part').value||0, ch:document.getElementById('t-ch').value||0 });
+  list.push({ id:Date.now(), nome, cat:document.getElementById('t-cat').value, per:document.getElementById('t-per').value, ult, prox:document.getElementById('t-prox').value, status:document.getElementById('t-stat').value, part:funcs.length, ch:document.getElementById('t-ch').value||0, funcs });
   DB.set(K.T, list);
   closeModal('treinamento');
   renderT();
@@ -1358,6 +1789,91 @@ function delT(id) {
   if (!confirm('Remover este treinamento?')) return;
   DB.set(K.T, DB.get(K.T).filter(r=>r.id!==id));
   renderT();
+}
+
+let _tdEmps = [];
+
+function openTrainingDetail(id) {
+  const r = DB.get(K.T).find(t => t.id === id);
+  if (!r) return;
+  const F = DB.get(K.F);
+  const stCls = { 'Concluído':'b-ok', 'Agendado':'b-sched', 'Em Andamento':'b-prog', 'Vencido':'b-exp' };
+  const catCls = { NR:'cNR', SST:'cSST', Operacional:'cOp', 'Emergência':'cEm' };
+
+  _tdEmps = (r.funcs||[]).map(fid => F.find(f => f.id === fid)).filter(Boolean);
+
+  document.getElementById('td-page-nome').textContent = r.nome;
+  document.getElementById('td-page-sub').textContent = `${r.cat} · ${r.per} · ${_tdEmps.length} participante${_tdEmps.length!==1?'s':''}`;
+
+  document.getElementById('td-page-meta').innerHTML = `
+    <div class="detail-meta-card">
+      <span class="dmc-label">Status</span>
+      <span style="margin-top:4px"><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></span>
+    </div>
+    <div class="detail-meta-card">
+      <span class="dmc-label">Última Realização</span>
+      <span class="dmc-val">${fmt(r.ult)}</span>
+    </div>
+    <div class="detail-meta-card">
+      <span class="dmc-label">Próxima Realização</span>
+      <span class="dmc-val">${fmt(r.prox)||'—'}</span>
+    </div>
+    <div class="detail-meta-card">
+      <span class="dmc-label">Carga Horária</span>
+      <span class="dmc-val">${r.ch||0}h</span>
+    </div>
+    <div class="detail-meta-card">
+      <span class="dmc-label">Participantes</span>
+      <span class="dmc-val">${_tdEmps.length}</span>
+    </div>
+    <div class="detail-meta-card">
+      <span class="dmc-label">Categoria</span>
+      <span style="margin-top:4px"><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></span>
+    </div>`;
+
+  renderDetailEmps(_tdEmps);
+
+  // navega para a tela de detalhe
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-treinamento-detalhe').classList.add('active');
+}
+
+function renderDetailEmps(list) {
+  const tbody = document.getElementById('td-page-tbody');
+  const empty = document.getElementById('td-page-empty');
+  document.getElementById('td-page-cnt').textContent = `${list.length} participante${list.length!==1?'s':''}`;
+  const sc = { Ativo:'b-ok', Afastado:'b-alert', Desligado:'b-exp' };
+
+  if (!list.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    tbody.innerHTML = list.map((f,i) => `<tr class="emp-row" onclick="editF(${f.id})" title="Clique para editar">
+      <td><div class="rn">${String(i+1).padStart(2,'0')}</div></td>
+      <td><strong style="font-weight:600">${f.nome}</strong></td>
+      <td style="color:var(--t2)">${f.cargo||'—'}</td>
+      <td style="color:var(--t2)">${f.setor||'—'}</td>
+      <td style="color:var(--t2)">${fmt(f.adm)}</td>
+      <td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td>
+      <td style="color:var(--t3);font-size:12px"><i class="fa-solid fa-pen-to-square"></i></td>
+    </tr>`).join('');
+  }
+}
+
+function filterDetailEmps(search) {
+  const filtered = _tdEmps.filter(f =>
+    (f.nome+f.cargo+f.setor).toLowerCase().includes(search.toLowerCase())
+  );
+  renderDetailEmps(filtered);
+}
+
+function voltarTreinamentos() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-treinamentos').classList.add('active');
+  // reativa o item de menu
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector('[onclick*="treinamentos"]').classList.add('active');
 }
 
 // ── EXAMES ──
@@ -1447,14 +1963,48 @@ function renderF(search='') {
   </tr>`).join('');
 }
 
+function editF(id) {
+  const f = DB.get(K.F).find(r => r.id === id);
+  if (!f) return;
+  document.getElementById('f-modal-title').textContent = 'Editar Funcionário';
+  document.getElementById('f-edit-id').value = f.id;
+  document.getElementById('f-nome').value  = f.nome  || '';
+  document.getElementById('f-cargo').value = f.cargo || '';
+  document.getElementById('f-setor').value = f.setor || '';
+  document.getElementById('f-adm').value   = f.adm   || '';
+  document.getElementById('f-stat').value  = f.status|| 'Ativo';
+  document.getElementById('modal-funcionario').classList.add('open');
+}
+
 function saveF() {
-  const nome=document.getElementById('f-nome').value.trim();
+  const nome = document.getElementById('f-nome').value.trim();
   if (!nome) { alert('Informe o nome.'); return; }
-  const list=DB.get(K.F);
-  list.push({ id:Date.now(), nome, cargo:document.getElementById('f-cargo').value, setor:document.getElementById('f-setor').value, adm:document.getElementById('f-adm').value, status:document.getElementById('f-stat').value });
+  const editId = +document.getElementById('f-edit-id').value;
+  let list = DB.get(K.F);
+
+  if (editId) {
+    list = list.map(r => r.id === editId
+      ? { ...r, nome, cargo:document.getElementById('f-cargo').value, setor:document.getElementById('f-setor').value, adm:document.getElementById('f-adm').value, status:document.getElementById('f-stat').value }
+      : r
+    );
+  } else {
+    list.push({ id:Date.now(), nome, cargo:document.getElementById('f-cargo').value, setor:document.getElementById('f-setor').value, adm:document.getElementById('f-adm').value, status:document.getElementById('f-stat').value });
+  }
+
   DB.set(K.F, list);
   closeModal('funcionario');
-  renderF();
+
+  // atualiza a tela correta dependendo de onde veio
+  const detalheAtivo = document.getElementById('page-treinamento-detalhe').classList.contains('active');
+  if (detalheAtivo) {
+    _tdEmps = _tdEmps.map(f => f.id === editId ? DB.get(K.F).find(r => r.id === editId) || f : f);
+    renderDetailEmps(_tdEmps);
+    // atualiza contador no subtítulo
+    const sub = document.getElementById('td-page-sub');
+    if (sub) sub.textContent = sub.textContent;
+  } else {
+    renderF();
+  }
 }
 
 function delF(id) {
@@ -1537,6 +2087,81 @@ function delAc(id) {
 }
 
 renderInicio();
+
+// ── RESIZE HELPERS ──
+function noSelect(on) {
+  const v = on ? 'none' : '';
+  document.body.style.userSelect = v;
+  document.body.style.webkitUserSelect = v;
+  document.body.style.cursor = on ? 'col-resize' : '';
+  if (on) window.getSelection()?.removeAllRanges();
+}
+
+// ── RESIZE: SIDEBAR ──
+(function() {
+  const sb = document.getElementById('sidebar');
+  const handle = document.getElementById('sb-resize');
+  let active = false, startX, startW;
+
+  handle.addEventListener('mousedown', e => {
+    active = true; startX = e.clientX; startW = sb.offsetWidth;
+    handle.classList.add('dragging');
+    noSelect(true);
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    const w = Math.min(340, Math.max(180, startW + (e.clientX - startX)));
+    sb.style.width = w + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!active) return;
+    active = false;
+    handle.classList.remove('dragging');
+    noSelect(false);
+    localStorage.setItem('sst_sb_w', sb.style.width);
+  });
+
+  const saved = localStorage.getItem('sst_sb_w');
+  if (saved) sb.style.width = saved;
+})();
+
+// ── RESIZE: SPLIT PANELS ──
+(function() {
+  document.querySelectorAll('.split-handle').forEach(handle => {
+    const split = handle.closest('.split');
+    const side  = handle.nextElementSibling;
+    const key   = 'sst_split_' + (handle.dataset.split || '');
+    let active = false, startX, startW;
+
+    handle.addEventListener('mousedown', e => {
+      active = true; startX = e.clientX; startW = side.offsetWidth;
+      handle.classList.add('dragging');
+      noSelect(true);
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!active) return;
+      const w = Math.min(420, Math.max(160, startW - (e.clientX - startX)));
+      side.style.width = w + 'px';
+      side.style.flexShrink = '0';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!active) return;
+      active = false;
+      handle.classList.remove('dragging');
+      noSelect(false);
+      localStorage.setItem(key, side.style.width);
+    });
+
+    const saved = localStorage.getItem(key);
+    if (saved) { side.style.width = saved; side.style.flexShrink = '0'; }
+  });
+})();
 </script>
 </body>
 </html>

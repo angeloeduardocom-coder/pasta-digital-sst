@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestão SST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous"/>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --primary:#4F46E5; --primary-d:#4338CA; --primary-l:#EEF2FF;
+      --sb-bg:#0F172A; --sb-hover:rgba(255,255,255,.05); --sb-active:rgba(99,102,241,.15); --sb-border:rgba(255,255,255,.06);
+      --bg:#F1F5F9; --surface:#FFFFFF; --border:#E2E8F0;
+      --t1:#0F172A; --t2:#475569; --t3:#94A3B8;
+      --green:#10B981; --green-l:#D1FAE5; --yellow:#F59E0B; --yellow-l:#FEF3C7;
+      --red:#EF4444; --red-l:#FEE2E2; --purple:#8B5CF6; --purple-l:#EDE9FE;
+      --blue:#3B82F6; --blue-l:#DBEAFE; --radius:12px;
+      --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.04);
+      --shadow-md:0 4px 16px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.06);
+      --shadow-lg:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.08);
+    }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); display:flex; height:100vh; overflow:hidden; color:var(--t1); -webkit-font-smoothing:antialiased; line-height:1.5; }
+
+    /* SIDEBAR */
+    .sidebar { width:240px; background:var(--sb-bg); display:flex; flex-direction:column; flex-shrink:0; position:relative; z-index:10; box-shadow:4px 0 24px rgba(0,0,0,.2); }
+    .sb-logo { padding:22px 20px 18px; border-bottom:1px solid var(--sb-border); display:flex; align-items:center; gap:12px; }
+    .sb-icon { width:40px; height:40px; background:linear-gradient(135deg,var(--primary),#818CF8); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; box-shadow:0 4px 12px rgba(79,70,229,.4); }
+    .sb-brand { color:#fff; }
+    .sb-brand .name { font-size:15.5px; font-weight:700; letter-spacing:-.3px; }
+    .sb-brand .tagline { font-size:11px; color:rgba(255,255,255,.38); margin-top:2px; font-weight:500; }
+    .sb-nav { flex:1; padding:14px 0; overflow-y:auto; }
+    .sb-section { padding:14px 20px 5px; font-size:10.5px; font-weight:600; letter-spacing:.9px; color:rgba(255,255,255,.28); text-transform:uppercase; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:10px 16px; margin:2px 8px; color:rgba(255,255,255,.52); cursor:pointer; font-size:13.5px; font-weight:500; border-radius:8px; transition:all .18s; user-select:none; position:relative; }
+    .nav-item:hover { background:var(--sb-hover); color:rgba(255,255,255,.85); }
+    .nav-item.active { background:var(--sb-active); color:#A5B4FC; }
+    .nav-item.active::before { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:3px; height:20px; background:linear-gradient(180deg,#818CF8,var(--primary)); border-radius:0 3px 3px 0; }
+    .nav-icon { font-size:14px; width:22px; text-align:center; display:flex; align-items:center; justify-content:center; }
+    .nav-icon i { font-size:13px; }
+    .sb-icon i { font-size:18px; color:#fff; }
+    .sb-footer { padding:14px 20px; border-top:1px solid var(--sb-border); display:flex; align-items:center; gap:10px; }
+    .sb-avatar { width:32px; height:32px; background:linear-gradient(135deg,#818CF8,var(--primary)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+    .sb-user { flex:1; }
+    .sb-user .uname { font-size:12.5px; font-weight:600; color:rgba(255,255,255,.75); }
+    .sb-user .urole { font-size:10.5px; color:rgba(255,255,255,.33); }
+    .btn-logout { background:none; border:none; cursor:pointer; color:rgba(255,255,255,.35); font-size:14px; padding:4px; transition:color .15s; }
+    .btn-logout:hover { color:#F87171; }
+
+    /* RESIZE */
+    .sb-resize { position:absolute; right:-3px; top:0; bottom:0; width:6px; cursor:col-resize; z-index:20; transition:background .2s; user-select:none; -webkit-user-select:none; }
+    .sb-resize:hover, .sb-resize.dragging { background:rgba(79,70,229,.35); }
+    .split-handle { width:8px; flex-shrink:0; align-self:stretch; cursor:col-resize; position:relative; border-radius:4px; transition:background .2s; user-select:none; -webkit-user-select:none; }
+    .split-handle::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:2px; height:44px; background:var(--border); border-radius:2px; transition:all .2s; }
+    .split-handle:hover::after, .split-handle.dragging::after { background:var(--primary); height:60px; }
+    .split-handle:hover, .split-handle.dragging { background:rgba(79,70,229,.06); }
+
+    /* MAIN */
+    .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .topbar { background:linear-gradient(to bottom,#fff,#FAFBFD); padding:0 28px; height:68px; display:flex; align-items:center; border-bottom:1px solid var(--border); flex-shrink:0; gap:14px; box-shadow:0 1px 0 var(--border),0 2px 8px rgba(0,0,0,.03); }
+    .topbar-left { flex:1; }
+    .topbar-left h2 { font-size:20px; font-weight:700; letter-spacing:-.45px; color:var(--t1); }
+    .topbar-left .sub { font-size:13px; color:var(--t3); margin-top:2px; }
+    .btn-primary { display:inline-flex; align-items:center; gap:7px; background:linear-gradient(135deg,var(--primary),#818CF8); color:#fff; border:none; padding:10px 20px; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; white-space:nowrap; font-family:inherit; transition:all .2s; box-shadow:0 2px 8px rgba(79,70,229,.35); }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(79,70,229,.45); }
+    .btn-danger { background:linear-gradient(135deg,var(--red),#F87171); box-shadow:0 2px 8px rgba(239,68,68,.3); }
+    .btn-danger:hover { box-shadow:0 4px 16px rgba(239,68,68,.4); }
+    .page { display:none; flex-direction:column; height:100%; }
+    .page.active { display:flex; }
+    .page-body { flex:1; overflow-y:auto; padding:20px 22px; }
+
+    /* CARDS */
+    .cards-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .dash-5 { grid-template-columns:repeat(5,1fr) !important; }
+    .stat-card { background:var(--surface); border-radius:var(--radius); padding:16px 18px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); border:1px solid var(--border); transition:transform .2s,box-shadow .2s; min-width:0; }
+    .stat-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .stat-ring { position:relative; width:54px; height:54px; flex-shrink:0; }
+    .stat-ring svg { transform:rotate(-90deg); }
+    .ring-bg { fill:none; stroke:#EFF2F7; stroke-width:5; }
+    .ring-fill { fill:none; stroke-width:5; stroke-linecap:round; transition:stroke-dasharray .6s ease; }
+    .ring-lbl { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:var(--t1); }
+    .stat-lbl { font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:1px; }
+    .stat-val { font-size:24px; font-weight:800; color:var(--t1); line-height:1; letter-spacing:-.8px; }
+    .stat-pct { font-size:12px; color:var(--t3); margin-top:3px; }
+    .icon-card { width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+    .icon-card i { font-size:20px; }
+
+    /* SPLIT */
+    .split { display:flex; gap:0; align-items:flex-start; }
+    .split-main { flex:1; min-width:0; margin-right:8px; }
+    .split-side { width:240px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; margin-left:8px; }
+
+    /* TABLE */
+    .tcard { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); }
+    .tcard-toolbar { padding:14px 18px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); flex-wrap:wrap; background:#FAFBFD; }
+    .tcard-toolbar h3 { font-size:15px; font-weight:700; flex:1; color:var(--t1); letter-spacing:-.2px; }
+    .search-box { display:flex; align-items:center; gap:7px; border:1.5px solid var(--border); border-radius:8px; padding:7px 12px; background:var(--surface); transition:border-color .15s; }
+    .search-box:focus-within { border-color:var(--primary); }
+    .search-icon { font-size:13px; color:var(--t3); }
+    .search-icon i { font-size:12px; }
+    .search-box input { border:none; background:none; outline:none; font-size:12.5px; width:160px; color:var(--t1); font-family:inherit; font-weight:500; }
+    .search-box input::placeholder { color:var(--t3); }
+    .flt { border:1.5px solid var(--border); border-radius:8px; padding:7px 10px; font-size:12px; color:var(--t2); background:var(--surface); outline:none; cursor:pointer; font-family:inherit; font-weight:500; transition:border-color .15s; }
+    .flt:focus { border-color:var(--primary); }
+    .table-scroll { overflow-x:auto; width:100%; }
+    .table-scroll::-webkit-scrollbar { height:4px; }
+    table { width:100%; border-collapse:collapse; min-width:700px; }
+    thead th { padding:11px 16px; text-align:left; font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.55px; background:#FAFBFD; white-space:nowrap; }
+    tbody tr { border-top:1px solid #F1F5F9; transition:background .12s; }
+    tbody tr:hover { background:#FAFBFF; }
+    tbody td { padding:12px 16px; font-size:13.5px; color:var(--t1); }
+    .rn { width:26px; height:26px; border-radius:7px; background:var(--primary-l); color:var(--primary); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+    .tfoot { padding:11px 18px; font-size:12px; color:var(--t3); border-top:1px solid var(--border); background:#FAFBFD; font-weight:500; }
+
+    /* BADGES */
+    .badge { display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:20px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+    .badge .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+    .b-ok { background:var(--green-l); color:#065F46; } .b-ok .dot { background:var(--green); }
+    .b-alert { background:var(--yellow-l); color:#92400E; } .b-alert .dot { background:var(--yellow); }
+    .b-exp { background:var(--red-l); color:#991B1B; } .b-exp .dot { background:var(--red); }
+    .b-prog { background:var(--blue-l); color:#1E40AF; } .b-prog .dot { background:var(--blue); }
+    .b-sched { background:var(--purple-l); color:#5B21B6; } .b-sched .dot { background:var(--purple); }
+    .cat-badge { display:inline-block; padding:3px 9px; border-radius:6px; font-size:11px; font-weight:600; }
+    .cNR { background:#EEF2FF; color:#3730A3; } .cSST { background:#ECFDF5; color:#065F46; }
+    .cOp { background:#FFFBEB; color:#92400E; } .cEm { background:#FEF2F2; color:#991B1B; }
+
+    /* CHART */
+    .chart-card { background:var(--surface); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); border:1px solid var(--border); }
+    .chart-card h4 { font-size:13.5px; font-weight:700; color:var(--t1); margin-bottom:14px; letter-spacing:-.2px; }
+    .vt { width:100%; border-collapse:collapse; }
+    .vt td { padding:7px 0; font-size:13px; border-bottom:1px solid #F1F5F9; }
+    .vt td:first-child { color:var(--t1); font-weight:500; }
+    .vt td:last-child { text-align:right; color:var(--yellow); font-weight:600; }
+    .vt tr:last-child td { border-bottom:none; }
+
+    /* EMPTY */
+    .empty { text-align:center; padding:52px 20px; color:var(--t3); }
+    .empty .ei { font-size:40px; margin-bottom:12px; display:block; opacity:.6; }
+    .ei i { font-size:38px; opacity:.45; color:var(--t3); }
+    .empty p { font-size:14px; line-height:1.7; color:var(--t3); }
+    .empty strong { color:var(--t2); }
+    .ab { background:none; border:none; cursor:pointer; padding:5px 7px; border-radius:7px; font-size:14px; color:var(--t3); transition:all .15s; }
+    .ab:hover { background:#FEE2E2; color:var(--red); }
+    .ab i { font-size:12px; }
+
+    /* TWIN */
+    .twin { display:flex; gap:16px; align-items:stretch; }
+    .twin .tcard { flex:1; min-width:0; display:flex; flex-direction:column; min-height:420px; overflow:hidden; }
+    .twin .tcard .table-scroll { overflow-x:auto; flex:1; }
+    .twin .tcard table { min-width:420px; }
+    .twin .empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+    /* MODAL */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,.5); backdrop-filter:blur(4px); z-index:999; align-items:center; justify-content:center; padding:20px; }
+    .overlay.open { display:flex; animation:fadeIn .18s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .modal { background:var(--surface); border-radius:16px; padding:28px 30px; width:500px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); border:1px solid var(--border); animation:slideUp .2s ease; }
+    @keyframes slideUp { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal-title { font-size:18px; font-weight:800; color:var(--t1); margin-bottom:22px; letter-spacing:-.4px; display:flex; align-items:center; gap:10px; }
+    .modal-title .mtag { width:36px; height:36px; border-radius:10px; background:var(--primary-l); display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .mtag i { font-size:16px; color:var(--primary); }
+    .field { margin-bottom:15px; }
+    .field label { display:block; font-size:11.5px; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:7px; }
+    .field input, .field select { width:100%; padding:10px 13px; border:1.5px solid var(--border); border-radius:9px; font-size:14px; color:var(--t1); background:var(--surface); outline:none; font-family:inherit; font-weight:500; transition:border-color .15s,box-shadow .15s; }
+    .field input:focus, .field select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.12); }
+    .field input::placeholder { color:var(--t3); font-weight:400; }
+    .frow { display:flex; gap:12px; }
+    .frow .field { flex:1; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
+    .btn-cancel { padding:10px 18px; border:1.5px solid var(--border); background:var(--surface); border-radius:9px; font-size:13px; cursor:pointer; color:var(--t2); font-family:inherit; font-weight:600; transition:all .15s; }
+    .btn-cancel:hover { background:#F8FAFC; border-color:var(--t3); }
+    .btn-save { padding:10px 24px; background:linear-gradient(135deg,var(--primary),#818CF8); color:#fff; border:none; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; box-shadow:0 2px 8px rgba(79,70,229,.35); transition:all .2s; }
+    .btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(79,70,229,.45); }
+
+    /* DASHBOARD */
+    .dash-charts-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+    .dash-charts-grid .chart-card { padding:12px 14px; }
+    .dash-charts-grid .chart-card h4 { font-size:12px; margin-bottom:8px; }
+    .dash-alert-strip { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .dash-alert-banner { background:#FFF7ED; border:1px solid #FED7AA; border-radius:var(--radius); padding:12px 18px; margin-bottom:16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .dash-alert-banner .ban-icon { font-size:18px; flex-shrink:0; }
+    .dash-alert-banner .ban-title { font-size:13px; font-weight:700; color:#92400E; }
+    .dash-alert-banner .ban-sub { font-size:12px; color:#B45309; margin-top:1px; }
+    .dash-resumo-item { display:flex; justify-content:space-between; align-items:center; font-size:13px; padding:8px 0; border-bottom:1px solid #F1F5F9; }
+    .dash-resumo-item:last-child { border-bottom:none; }
+    .dash-resumo-item .ri-label { color:var(--t2); font-weight:500; }
+    .dash-resumo-item .ri-val { font-weight:700; color:var(--t1); }
+    .dash-resumo-item .ri-val.ok { color:var(--green); }
+    .dash-resumo-item .ri-val.bad { color:var(--red); }
+    .dash-date-chip { background:var(--primary-l); color:var(--primary); padding:6px 14px; border-radius:20px; font-size:12.5px; font-weight:600; white-space:nowrap; }
+
+    /* EMP PICKER */
+    .emp-picker { max-height:150px; overflow-y:auto; border:1.5px solid var(--border); border-radius:9px; padding:4px; }
+    .emp-picker:focus-within { border-color:var(--primary); }
+    .emp-check { display:flex; align-items:center; gap:9px; padding:7px 10px; border-radius:7px; cursor:pointer; font-size:13.5px; color:var(--t1); transition:background .12s; user-select:none; -webkit-user-select:none; }
+    .emp-check:hover { background:var(--primary-l); }
+    .emp-check input[type=checkbox] { width:15px; height:15px; accent-color:var(--primary); flex-shrink:0; cursor:pointer; }
+    .emp-check .ec-sub { font-size:11px; color:var(--t3); margin-top:1px; }
+    .emp-count { font-size:11.5px; color:var(--t3); margin-top:5px; }
+    .td-empty { text-align:center; padding:28px 20px; color:var(--t3); font-size:13.5px; }
+
+    /* TRAINING DETAIL PAGE */
+    .btn-back { display:inline-flex; align-items:center; gap:7px; background:none; border:1.5px solid var(--border); padding:9px 16px; border-radius:9px; font-size:13px; font-weight:600; color:var(--t2); cursor:pointer; font-family:inherit; transition:all .15s; }
+    .btn-back:hover { background:#F8FAFC; border-color:var(--t3); color:var(--t1); }
+    .detail-meta { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
+    .detail-meta-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 20px; display:flex; flex-direction:column; gap:3px; min-width:130px; }
+    .dmc-label { font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; }
+    .dmc-val { font-size:17px; font-weight:800; color:var(--t1); letter-spacing:-.4px; }
+    .emp-row { cursor:pointer; transition:background .12s; }
+    .emp-row:hover { background:#F0F4FF !important; }
+    .emp-row:hover td:last-child { color:var(--primary) !important; }
+    .detail-empty { text-align:center; padding:80px 20px; color:var(--t3); }
+    .detail-empty i { font-size:48px; opacity:.25; display:block; margin-bottom:16px; }
+    .detail-empty p { font-size:15px; line-height:1.7; }
+    .tbl-clickable tbody tr { cursor:pointer; }
+    .tbl-clickable tbody tr:hover { background:#F0F4FF !important; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:10px; }
+    ::-webkit-scrollbar-thumb:hover { background:#94A3B8; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-resize" id="sb-resize"></div>
+  <div class="sb-logo">
+    <div class="sb-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <div class="sb-brand">
+      <div class="name">Gestão SST</div>
+      <div class="tagline">Saúde e Segurança do Trabalho</div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div class="nav-item active" onclick="go('inicio',this)">
+      <span class="nav-icon"><i class="fa-solid fa-house"></i></span> Início
+    </div>
+    <div class="sb-section">Gestão</div>
+    <div class="nav-item" onclick="go('treinamentos',this)">
+      <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Treinamentos
+    </div>
+    <div class="nav-item" onclick="go('extintores',this)">
+      <span class="nav-icon"><i class="fa-solid fa-fire-extinguisher"></i></span> Extintores
+    </div>
+    <div class="sb-section">Cadastros</div>
+    <div class="nav-item" onclick="go('funcionarios',this)">
+      <span class="nav-icon"><i class="fa-solid fa-users"></i></span> Funcionários
+    </div>
+    <div class="sb-section">Registros</div>
+    <div class="nav-item" onclick="go('inspecoes',this)">
+      <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Inspeções / Acidentes
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-avatar" id="sb-avatar">TS</div>
+    <div class="sb-user">
+      <div class="uname" id="sb-username">Técnico SST</div>
+      <div class="urole">Administrador</div>
+    </div>
+    <button class="btn-logout" onclick="logout()" title="Sair">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- INÍCIO -->
+  <div id="page-inicio" class="page active">
+    <div class="topbar">
+      <div class="topbar-left"><h2>Início</h2><div class="sub">Visão geral do sistema SST</div></div>
+      <div class="dash-date-chip" id="dash-date-chip"></div>
+    </div>
+    <div class="page-body">
+      <div class="cards-row dash-5" id="dash-cards"></div>
+      <div id="dash-alerts"></div>
+      <div id="dash-ext-alerta"></div>
+      <div class="dash-charts-grid">
+        <div class="chart-card"><h4>Treinamentos por Status</h4><canvas id="dash-ct" height="110"></canvas></div>
+        <div class="chart-card"><h4>Extintores por Situação</h4><canvas id="dash-cex" height="110"></canvas></div>
+        <div class="chart-card"><h4>Funcionários por Status</h4><canvas id="dash-cf" height="110"></canvas></div>
+        <div class="chart-card"><h4>Inspeções por Resultado</h4><canvas id="dash-ci" height="110"></canvas></div>
+      </div>
+      <div class="split">
+        <div class="split-main">
+          <div class="chart-card"><h4>Próximos a Vencer</h4><table class="vt" id="dash-vencer"></table></div>
+        </div>
+        <div class="split-handle" data-split="inicio"></div>
+        <div class="split-side">
+          <div class="chart-card"><h4>📊 Resumo Geral</h4><div id="dash-resumo"></div></div>
+        </div>
+      </div>
+      <div class="tcard" style="margin-top:16px">
+        <div class="tcard-toolbar">
+          <h3>⚠️ Colaboradores com Treinamentos Pendentes</h3>
+          <span id="dash-colab-cnt" class="badge b-exp" style="display:none"></span>
+        </div>
+        <div class="table-scroll">
+          <table><thead><tr><th>#</th><th>Colaborador</th><th>Cargo</th><th>Setor</th><th>Treinamento</th><th>Situação</th><th>Vencimento</th></tr></thead>
+          <tbody id="dash-colab-tbody"></tbody></table>
+        </div>
+        <div id="dash-colab-empty" class="empty" style="display:none">
+          <span class="ei"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i></span>
+          <p><strong>Tudo em dia!</strong><br>Nenhum colaborador com treinamento vencido ou vencendo.</p>
+        </div>
+        <div class="tfoot"><span id="dash-colab-footer">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TREINAMENTOS -->
+  <div id="page-treinamentos" class="page">
+    <div class="topbar">
+      <div class="topbar-left"><h2>Treinamentos</h2><div class="sub">Gestão completa dos treinamentos da empresa</div></div>
+      <button class="btn-primary" onclick="openModal('treinamento')"><i class="fa-solid fa-plus"></i> Novo Treinamento</button>
+    </div>
+    <div class="page-body">
+      <div class="cards-row" id="t-cards"></div>
+      <div class="split">
+        <div class="split-main">
+          <div class="tcard">
+            <div class="tcard-toolbar">
+              <h3>Lista de Treinamentos</h3>
+              <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar treinamento..." oninput="renderT(this.value)"/></div>
+              <select class="flt" id="t-fs" onchange="renderT()">
+                <option value="">Todos os status</option>
+                <option>Concluído</option><option>Agendado</option><option>Em Andamento</option><option>Vencido</option>
+              </select>
+            </div>
+            <table><thead><tr><th>#</th><th>Treinamento</th><th>Categoria</th><th>Última Realização</th><th>Próxima Realização</th><th>Status</th><th>Part.</th><th></th></tr></thead>
+            <tbody id="tbody-t"></tbody></table>
+            <div id="empty-t" class="empty" style="display:none">
+              <span class="ei"><i class="fa-regular fa-clipboard"></i></span>
+              <p>Nenhum treinamento registrado ainda.<br>Clique em <strong>+ Novo Treinamento</strong> para começar.</p>
+            </div>
+            <div class="tfoot"><span id="t-cnt">0 registros</span></div>
+          </div>
+        </div>
+        <div class="split-handle" data-split="treinamentos"></div>
+        <div class="split-side">
+          <div class="chart-card"><h4>Treinamentos por Status</h4><canvas id="chart-ts" height="170"></canvas></div>
+          <div class="chart-card"><h4>Próximos a Vencer</h4><table class="vt" id="t-vencer"><tr><td colspan="2" style="color:var(--t3);text-align:center;padding:14px 0;font-size:12px">Nenhum nos próximos 30 dias</td></tr></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTINTORES -->
+  <div id="page-extintores" class="page">
+    <div class="topbar">
+      <div class="topbar-left"><h2>Extintores</h2><div class="sub">Controle de extintores de incêndio</div></div>
+      <button class="btn-primary" onclick="openModal('extintor')"><i class="fa-solid fa-plus"></i> Novo Extintor</button>
+    </div>
+    <div class="page-body">
+      <div class="cards-row" id="ex-cards"></div>
+      <div class="tcard">
+        <div class="tcard-toolbar">
+          <h3>Lista de Extintores</h3>
+          <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar por local ou tipo..." oninput="renderEx(this.value)"/></div>
+          <select class="flt" id="ex-fs" onchange="renderEx()">
+            <option value="">Todos os status</option><option>Em dia</option><option>Vencendo</option><option>Vencido</option>
+          </select>
+        </div>
+        <div class="table-scroll">
+          <table><thead><tr><th>#</th><th>Identificação</th><th>Tipo</th><th>Capacidade</th><th>Localização</th><th>Última Recarga</th><th>Próxima Recarga</th><th>Situação</th><th></th></tr></thead>
+          <tbody id="tbody-ex"></tbody></table>
+        </div>
+        <div id="empty-ex" class="empty" style="display:none">
+          <span class="ei"><i class="fa-solid fa-fire-extinguisher"></i></span>
+          <p>Nenhum extintor cadastrado.<br>Clique em <strong>+ Novo Extintor</strong> para começar.</p>
+        </div>
+        <div class="tfoot"><span id="ex-cnt">0 registros</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUNCIONÁRIOS -->
+  <div id="page-funcionarios" class="page">
+    <div class="topbar">
+      <div class="topbar-left"><h2>Funcionários</h2><div class="sub">Cadastro de colaboradores da empresa</div></div>
+      <button class="btn-primary" onclick="openModal('funcionario')"><i class="fa-solid fa-plus"></i> Novo Funcionário</button>
+    </div>
+    <div class="page-body">
+      <div class="tcard">
+        <div class="tcard-toolbar">
+          <h3>Lista de Funcionários</h3>
+          <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar funcionário..." oninput="renderF(this.value)"/></div>
+        </div>
+        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Admissão</th><th>Status</th><th></th></tr></thead>
+        <tbody id="tbody-f"></tbody></table>
+        <div id="empty-f" class="empty" style="display:none">
+          <span class="ei"><i class="fa-solid fa-users"></i></span>
+          <p>Nenhum funcionário cadastrado.<br>Clique em <strong>+ Novo Funcionário</strong> para começar.</p>
+        </div>
+        <div class="tfoot"><span id="f-cnt">0 registros</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSPEÇÕES / ACIDENTES -->
+  <div id="page-inspecoes" class="page">
+    <div class="topbar">
+      <div class="topbar-left"><h2>Inspeções / Acidentes</h2><div class="sub">Registro de inspeções de segurança e ocorrências</div></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" onclick="openModal('inspecao')"><i class="fa-solid fa-plus"></i> Nova Inspeção</button>
+        <button class="btn-primary btn-danger" onclick="openModal('acidente')"><i class="fa-solid fa-circle-exclamation"></i> Acidente / CAT</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="twin">
+        <div class="tcard">
+          <div class="tcard-toolbar"><h3>Inspeções</h3><div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar..." oninput="renderI(this.value)"/></div></div>
+          <div class="table-scroll"><table><thead><tr><th>#</th><th>Local</th><th>Data</th><th>Resultado</th><th></th></tr></thead><tbody id="tbody-i"></tbody></table></div>
+          <div id="empty-i" class="empty" style="display:none"><span class="ei"><i class="fa-solid fa-magnifying-glass"></i></span><p>Nenhuma inspeção registrada.</p></div>
+          <div class="tfoot"><span id="i-cnt">0 registros</span></div>
+        </div>
+        <div class="tcard">
+          <div class="tcard-toolbar"><h3>Acidentes / CAT</h3><div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar..." oninput="renderAc(this.value)"/></div></div>
+          <div class="table-scroll"><table><thead><tr><th>#</th><th>Funcionário</th><th>Data</th><th>Tipo</th><th>CAT</th><th></th></tr></thead><tbody id="tbody-ac"></tbody></table></div>
+          <div id="empty-ac" class="empty" style="display:none"><span class="ei"><i class="fa-solid fa-triangle-exclamation"></i></span><p>Nenhum acidente registrado.</p></div>
+          <div class="tfoot"><span id="ac-cnt">0 registros</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALHE TREINAMENTO -->
+  <div id="page-treinamento-detalhe" class="page">
+    <div class="topbar">
+      <div class="topbar-left"><h2 id="td-page-nome">Treinamento</h2><div class="sub" id="td-page-sub">Participantes do treinamento</div></div>
+      <button class="btn-back" onclick="voltarTreinamentos()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+    </div>
+    <div class="page-body">
+      <div class="detail-meta" id="td-page-meta"></div>
+      <div class="tcard">
+        <div class="tcard-toolbar">
+          <h3>Colaboradores Participantes</h3>
+          <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar colaborador..." oninput="filterDetailEmps(this.value)"/></div>
+        </div>
+        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Admissão</th><th>Status</th><th></th></tr></thead>
+        <tbody id="td-page-tbody"></tbody></table>
+        <div id="td-page-empty" class="detail-empty" style="display:none">
+          <i class="fa-solid fa-users"></i>
+          <p>Nenhum colaborador vinculado a este treinamento.<br>Edite o treinamento para adicionar participantes.</p>
+        </div>
+        <div class="tfoot"><span id="td-page-cnt">0 participantes</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAIS -->
+<div class="overlay" id="modal-treinamento">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> Novo Treinamento</div>
+    <div class="field">
+      <label>Treinamento</label>
+      <select id="t-nome" onchange="document.getElementById('t-outro-w').style.display=this.value==='Outro'?'block':'none'">
+        <option value="">Selecione...</option>
+        <option>NR-05 – CIPA</option><option>NR-06 – EPI</option><option>NR-10 – Instalações Elétricas</option>
+        <option>NR-11 – Transporte e Armazenagem</option><option>NR-12 – Máquinas e Equipamentos</option>
+        <option>NR-18 – Construção Civil</option><option>NR-20 – Inflamáveis e Combustíveis</option>
+        <option>NR-23 – Combate a Incêndio</option><option>NR-33 – Espaço Confinado</option>
+        <option>NR-35 – Trabalho em Altura</option><option>Direção Defensiva</option>
+        <option>Primeiros Socorros</option><option>Integração de Segurança</option><option>Outro</option>
+      </select>
+    </div>
+    <div class="field" id="t-outro-w" style="display:none"><label>Especifique</label><input type="text" id="t-outro" placeholder="Nome do treinamento"/></div>
+    <div class="frow">
+      <div class="field"><label>Categoria</label><select id="t-cat"><option value="NR">NR</option><option value="SST">SST</option><option value="Operacional">Operacional</option><option value="Emergência">Emergência</option></select></div>
+      <div class="field"><label>Periodicidade</label><select id="t-per"><option>Anual</option><option>Bianual</option><option>Trianual</option><option>Quinquenal</option><option>Único</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Última Realização</label><input type="date" id="t-ult"/></div>
+      <div class="field"><label>Próxima Realização</label><input type="date" id="t-prox"/></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Status</label><select id="t-stat"><option>Concluído</option><option>Agendado</option><option>Em Andamento</option><option>Vencido</option></select></div>
+      <div class="field"><label>Carga Horária (h)</label><input type="number" id="t-ch" min="0" placeholder="0"/></div>
+    </div>
+    <div class="field">
+      <label>Participantes</label>
+      <div class="emp-picker" id="t-emp-picker"><div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div></div>
+      <div class="emp-count" id="t-emp-count">0 selecionados</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('treinamento')">Cancelar</button>
+      <button class="btn-save" onclick="saveT()">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-extintor">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-fire-extinguisher"></i></div> Novo Extintor</div>
+    <div class="frow">
+      <div class="field"><label>Identificação / Nº</label><input type="text" id="ex-id" placeholder="Ex: EXT-01"/></div>
+      <div class="field"><label>Tipo</label><select id="ex-tipo"><option>Pó Químico Seco (ABC)</option><option>Pó Químico Seco (BC)</option><option>CO² (Dióxido de Carbono)</option><option>Água Pressurizada</option><option>Espuma Mecânica</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Capacidade</label><select id="ex-cap"><option>1 kg</option><option>2 kg</option><option>4 kg</option><option>6 kg</option><option>8 kg</option><option>10 kg</option><option>12 kg</option><option>10 L</option><option>20 L</option><option>50 L</option></select></div>
+      <div class="field"><label>Localização</label><input type="text" id="ex-local" placeholder="Ex: Corredor Bloco A"/></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Última Recarga</label><input type="date" id="ex-ult"/></div>
+      <div class="field"><label>Próxima Recarga</label><input type="date" id="ex-prox"/></div>
+    </div>
+    <div class="field"><label>Observação</label><input type="text" id="ex-obs" placeholder="Anotações relevantes"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('extintor')">Cancelar</button>
+      <button class="btn-save" onclick="saveEx()">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-funcionario">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-user-pen"></i></div> <span id="f-modal-title">Novo Funcionário</span></div>
+    <input type="hidden" id="f-edit-id"/>
+    <div class="field"><label>Nome Completo</label><input type="text" id="f-nome" placeholder="Nome completo"/></div>
+    <div class="frow">
+      <div class="field"><label>Cargo</label><input type="text" id="f-cargo" placeholder="Ex: Soldador"/></div>
+      <div class="field"><label>Setor</label><input type="text" id="f-setor" placeholder="Ex: Produção"/></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Data de Admissão</label><input type="date" id="f-adm"/></div>
+      <div class="field"><label>Status</label><select id="f-stat"><option>Ativo</option><option>Afastado</option><option>Desligado</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('funcionario')">Cancelar</button>
+      <button class="btn-save" onclick="saveF()">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-inspecao">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-magnifying-glass"></i></div> Nova Inspeção</div>
+    <div class="frow">
+      <div class="field"><label>Local</label><input type="text" id="i-local" placeholder="Ex: Almoxarifado"/></div>
+      <div class="field"><label>Data</label><input type="date" id="i-data"/></div>
+    </div>
+    <div class="field"><label>Responsável</label><input type="text" id="i-resp" placeholder="Nome do responsável"/></div>
+    <div class="field"><label>Resultado</label><select id="i-res"><option>Satisfatório</option><option>Parcialmente Satisfatório</option><option>Insatisfatório</option></select></div>
+    <div class="field"><label>Observação</label><input type="text" id="i-obs" placeholder="Anotações relevantes"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('inspecao')">Cancelar</button>
+      <button class="btn-save" onclick="saveI()">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-acidente">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag" style="background:#FEE2E2"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i></div> Acidente / CAT</div>
+    <div class="field"><label>Funcionário</label><input type="text" id="ac-func" placeholder="Nome completo" list="fl-ac"/><datalist id="fl-ac"></datalist></div>
+    <div class="frow">
+      <div class="field"><label>Data</label><input type="date" id="ac-data"/></div>
+      <div class="field"><label>Tipo</label><select id="ac-tipo"><option>Acidente com afastamento</option><option>Acidente sem afastamento</option><option>Acidente com óbito</option><option>Quase acidente</option><option>Doença ocupacional</option></select></div>
+    </div>
+    <div class="field"><label>Descrição</label><input type="text" id="ac-desc" placeholder="Breve descrição do ocorrido"/></div>
+    <div class="field"><label>CAT Emitida?</label><select id="ac-cat"><option>Sim</option><option>Não</option><option>Em processo</option></select></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('acidente')">Cancelar</button>
+      <button class="btn-save" onclick="saveAc()">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ── AUTH ──
+if (!localStorage.getItem('sst_token')) window.location.href = '/';
+const _user = localStorage.getItem('sst_user') || 'Técnico';
+document.getElementById('sb-username').textContent = _user;
+document.getElementById('sb-avatar').textContent = _user.slice(0,2).toUpperCase();
+
+function logout() {
+  localStorage.removeItem('sst_token');
+  localStorage.removeItem('sst_user');
+  window.location.href = '/';
+}
+
+// ── API ──
+const API = {
+  h: () => ({ 'Content-Type':'application/json', 'Authorization':'Bearer '+localStorage.getItem('sst_token') }),
+  async get(ep) {
+    const r = await fetch('/api/'+ep, { headers: API.h() });
+    if (r.status === 401) { logout(); return []; }
+    return r.json();
+  },
+  async post(ep, data) {
+    const r = await fetch('/api/'+ep, { method:'POST', headers:API.h(), body:JSON.stringify(data) });
+    if (r.status === 401) { logout(); return null; }
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error||'Erro'); }
+    return r.json();
+  },
+  async put(ep, id, data) {
+    const r = await fetch('/api/'+ep+'?id='+id, { method:'PUT', headers:API.h(), body:JSON.stringify(data) });
+    if (r.status === 401) { logout(); return null; }
+    return r.json();
+  },
+  async del(ep, id) {
+    const r = await fetch('/api/'+ep+'?id='+id, { method:'DELETE', headers:API.h() });
+    if (r.status === 401) { logout(); return; }
+    return r.json();
+  }
+};
+
+const charts = {};
+let _cachedT=[], _cachedF=[], _tdEmps=[];
+
+function fmt(d) {
+  if (!d) return '—';
+  const s = typeof d==='string' ? (d.length>10?d.substring(0,10):d) : new Date(d).toISOString().substring(0,10);
+  const [y,m,dy] = s.split('-');
+  return `${dy}/${m}/${y}`;
+}
+function toISO(d) {
+  if (!d) return null;
+  return typeof d==='string' ? (d.length>10?d.substring(0,10):d) : new Date(d).toISOString().substring(0,10);
+}
+function svenc(v) {
+  if (!v) return 'ok';
+  const diff = (new Date(toISO(v)+'T12:00:00') - new Date()) / 86400000;
+  return diff<0?'exp':diff<=30?'alert':'ok';
+}
+function sitEx(v) { return svenc(v); }
+function slabel(s) { return {ok:'Em dia',alert:'Vencendo',exp:'Vencido'}[s]; }
+
+function ring(val, total, color) {
+  const r=23, c=2*Math.PI*r, dash=total>0?(val/total)*c:0;
+  return `<div class="stat-ring"><svg viewBox="0 0 54 54" width="54" height="54"><circle class="ring-bg" cx="27" cy="27" r="${r}"/><circle class="ring-fill" cx="27" cy="27" r="${r}" stroke="${color}" stroke-dasharray="${dash} ${c}"/></svg><div class="ring-lbl">${val}</div></div>`;
+}
+
+function donut(id, labels, data, colors) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#fff', borderRadius:5, hoverOffset:6 }] },
+    options:{ responsive:true, animation:{ animateRotate:true, animateScale:true, duration:1600, easing:'easeInOutQuart' }, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:9, family:'Inter' }, boxWidth:8, padding:6 } } }, cutout:'80%' }
+  });
+}
+
+function go(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  el.classList.add('active');
+  ({inicio:renderInicio,treinamentos:renderT,extintores:renderEx,funcionarios:renderF,inspecoes:()=>{renderI();renderAc();}})[page]();
+}
+
+// ── DASHBOARD ──
+async function renderInicio() {
+  const [T,F,I,AC,EX] = await Promise.all([API.get('treinamentos'),API.get('funcionarios'),API.get('inspecoes'),API.get('acidentes'),API.get('extintores')]);
+  _cachedT=T; _cachedF=F;
+  const dias=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const now=new Date();
+  document.getElementById('dash-date-chip').textContent=`${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
+
+  const fAtivos=F.filter(f=>f.status==='Ativo').length;
+  const tTot=T.length, tVenc=T.filter(r=>r.status==='Vencido').length;
+  const tConc=T.filter(r=>r.status==='Concluído').length, tAg=T.filter(r=>r.status==='Agendado').length, tEm=T.filter(r=>r.status==='Em Andamento').length;
+  const iTot=I.length, acTot=AC.length;
+  const exTot=EX.length, exOk=EX.filter(r=>sitEx(r.prox)==='ok').length;
+  const exAlert=EX.filter(r=>sitEx(r.prox)==='alert').length, exVenc=EX.filter(r=>sitEx(r.prox)==='exp').length;
+  const alertas=tVenc+exVenc+exAlert;
+
+  document.getElementById('dash-cards').innerHTML=`
+    <div class="stat-card"><div class="icon-card" style="background:#EEF2FF"><i class="fa-solid fa-users" style="color:#4F46E5"></i></div><div><div class="stat-lbl">Funcionários</div><div class="stat-val">${fAtivos}</div><div class="stat-pct">${F.length} cadastrados</div></div></div>
+    <div class="stat-card">${ring(tConc,tTot||1,'#10B981')}<div><div class="stat-lbl">Treinamentos</div><div class="stat-val">${tTot}</div><div class="stat-pct">${tVenc>0?`${tVenc} vencido${tVenc>1?'s':''}`:'tudo em dia'}</div></div></div>
+    <div class="stat-card">${ring(exOk,exTot||1,'#F97316')}<div><div class="stat-lbl">Extintores</div><div class="stat-val">${exTot}</div><div class="stat-pct">${exVenc>0?`${exVenc} vencido${exVenc>1?'s':''}`:exAlert>0?`${exAlert} vencendo`:'tudo em dia'}</div></div></div>
+    <div class="stat-card"><div class="icon-card" style="background:#ECFDF5"><i class="fa-solid fa-magnifying-glass" style="color:#10B981"></i></div><div><div class="stat-lbl">Inspeções</div><div class="stat-val">${iTot}</div><div class="stat-pct">${acTot} acidente${acTot!==1?'s':''}</div></div></div>
+    <div class="stat-card"><div class="icon-card" style="background:${alertas>0?'#FEE2E2':'#F0FDF4'}"><i class="fa-solid fa-${alertas>0?'circle-exclamation':'circle-check'}" style="color:${alertas>0?'var(--red)':'var(--green)'}"></i></div><div><div class="stat-lbl">Alertas</div><div class="stat-val" style="color:${alertas>0?'var(--red)':'var(--green)'}">${alertas}</div><div class="stat-pct">${alertas>0?'requerem atenção':'tudo em ordem'}</div></div></div>`;
+
+  const alertItems=[];
+  T.filter(r=>r.status==='Vencido').forEach(r=>alertItems.push({label:`Treinamento vencido: ${r.nome}`,cls:'b-exp'}));
+  T.filter(r=>r.prox&&svenc(r.prox)==='alert').forEach(r=>alertItems.push({label:`Vencendo em breve: ${r.nome}`,cls:'b-alert'}));
+  document.getElementById('dash-alerts').innerHTML=alertItems.length?`<div class="dash-alert-banner"><span class="ban-icon"><i class="fa-solid fa-triangle-exclamation" style="color:#D97706"></i></span><div><div class="ban-title">${alertItems.length} item${alertItems.length>1?'s':''} requer${alertItems.length===1?'':'em'} atenção</div><div class="ban-sub">Verifique os itens vencidos ou prestes a vencer</div></div><div class="dash-alert-strip" style="margin:0;flex:1;justify-content:flex-end">${alertItems.slice(0,5).map(a=>`<span class="badge ${a.cls}"><span class="dot"></span>${a.label}</span>`).join('')}${alertItems.length>5?`<span class="badge b-alert"><span class="dot"></span>+${alertItems.length-5} mais</span>`:''}</div></div>`:'';
+
+  const extProbs=[...EX.filter(r=>sitEx(r.prox)==='exp').map(r=>({label:`${r.id_num} – ${r.local||r.tipo} (Vencido)`,cls:'b-exp'})),...EX.filter(r=>sitEx(r.prox)==='alert').map(r=>({label:`${r.id_num} – ${r.local||r.tipo} (Vencendo ${fmt(r.prox)})`,cls:'b-alert'}))];
+  document.getElementById('dash-ext-alerta').innerHTML=extProbs.length?`<div class="dash-alert-banner" style="background:#FFF1F2;border-color:#FECDD3;margin-bottom:12px"><span class="ban-icon"><i class="fa-solid fa-fire-extinguisher" style="color:#E11D48"></i></span><div><div class="ban-title" style="color:#9F1239">${extProbs.length} extintor${extProbs.length>1?'es':''} com situação irregular</div><div class="ban-sub" style="color:#BE123C">Verifique os extintores vencidos ou próximos do vencimento</div></div><div class="dash-alert-strip" style="margin:0;flex:1;justify-content:flex-end">${extProbs.slice(0,5).map(a=>`<span class="badge ${a.cls}"><span class="dot"></span>${a.label}</span>`).join('')}${extProbs.length>5?`<span class="badge b-alert"><span class="dot"></span>+${extProbs.length-5} mais</span>`:''}</div></div>`:'';
+
+  donut('dash-ct',['Concluído','Agendado','Em Andamento','Vencido'],[tConc,tAg,tEm,tVenc],['#10B981','#8B5CF6','#3B82F6','#EF4444']);
+  donut('dash-cex',['Em Dia','Vencendo','Vencido'],[exOk,exAlert,exVenc],['#10B981','#F59E0B','#EF4444']);
+  const fA=F.filter(f=>f.status==='Ativo').length, fAf=F.filter(f=>f.status==='Afastado').length, fD=F.filter(f=>f.status==='Desligado').length;
+  donut('dash-cf',['Ativo','Afastado','Desligado'],[fA,fAf,fD],['#10B981','#F59E0B','#94A3B8']);
+  const iS=I.filter(r=>r.res==='Satisfatório').length, iP=I.filter(r=>r.res==='Parcialmente Satisfatório').length, iI=I.filter(r=>r.res==='Insatisfatório').length;
+  donut('dash-ci',['Satisfatório','Parcial','Insatisfatório'],[iS,iP,iI],['#10B981','#F59E0B','#EF4444']);
+
+  const pv=[];
+  T.filter(r=>r.prox&&svenc(r.prox)==='alert').forEach(r=>pv.push({nome:r.nome,tipo:'Treinamento',data:r.prox}));
+  EX.filter(r=>r.prox&&sitEx(r.prox)==='alert').forEach(r=>pv.push({nome:`${r.id_num} – ${r.local||r.tipo}`,tipo:'Extintor',data:r.prox}));
+  pv.sort((a,b)=>new Date(toISO(a.data))-new Date(toISO(b.data)));
+  document.getElementById('dash-vencer').innerHTML=pv.length?pv.slice(0,8).map(r=>`<tr><td><span style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;display:block">${r.tipo}</span>${r.nome}</td><td>${fmt(r.data)}</td></tr>`).join(''):'<tr><td colspan="2" style="color:var(--t3);text-align:center;padding:18px 0;font-size:12.5px">Nenhum nos próximos 30 dias</td></tr>';
+
+  document.getElementById('dash-resumo').innerHTML=[
+    {label:'Funcionários ativos',val:fAtivos>0?`${fAtivos}/${F.length}`:'—',cls:fAtivos>0?'ok':''},
+    {label:'Treinamentos concluídos',val:tTot>0?`${tConc}/${tTot}`:'—',cls:tVenc>0?'bad':tConc>0?'ok':''},
+    {label:'Extintores em dia',val:exTot>0?`${exOk}/${exTot}`:'—',cls:exVenc>0?'bad':exOk>0?'ok':''},
+    {label:'Inspeções realizadas',val:iTot||'—',cls:''},
+    {label:'Acidentes / CAT',val:acTot||'—',cls:acTot>0?'bad':''},
+  ].map(r=>`<div class="dash-resumo-item"><span class="ri-label">${r.label}</span><span class="ri-val ${r.cls}">${r.val}</span></div>`).join('');
+
+  const pendentes=[];
+  T.forEach(t=>{
+    const sit=t.status==='Vencido'?'vencido':(t.prox&&svenc(t.prox)==='alert')?'vencendo':null;
+    if(!sit)return;
+    (t.funcs||[]).forEach(f=>pendentes.push({func:f,treinamento:t.nome,sit,prox:t.prox}));
+  });
+  pendentes.sort((a,b)=>({vencido:0,vencendo:1}[a.sit]-{vencido:0,vencendo:1}[b.sit]));
+  const cntEl=document.getElementById('dash-colab-cnt'), tbodyC=document.getElementById('dash-colab-tbody'), emptyC=document.getElementById('dash-colab-empty'), footerC=document.getElementById('dash-colab-footer');
+  if(!pendentes.length){tbodyC.innerHTML='';emptyC.style.display='block';cntEl.style.display='none';footerC.textContent='Nenhuma pendência';}
+  else{
+    emptyC.style.display='none';cntEl.style.display='inline-flex';
+    cntEl.innerHTML=`<span class="dot"></span>${pendentes.length} pendência${pendentes.length!==1?'s':''}`;
+    footerC.textContent=`${pendentes.length} registro${pendentes.length!==1?'s':''}`;
+    tbodyC.innerHTML=pendentes.map((p,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${p.func.nome}</strong></td><td style="color:var(--t2)">${p.func.cargo||'—'}</td><td style="color:var(--t2)">${p.func.setor||'—'}</td><td>${p.treinamento}</td><td><span class="badge ${p.sit==='vencido'?'b-exp':'b-alert'}"><span class="dot"></span>${p.sit==='vencido'?'Vencido':'Vencendo'}</span></td><td style="color:var(--t2)">${fmt(p.prox)}</td></tr>`).join('');
+  }
+}
+
+// ── MODAL ──
+async function openModal(tipo) {
+  if(tipo==='funcionario'){
+    document.getElementById('f-modal-title').textContent='Novo Funcionário';
+    document.getElementById('f-edit-id').value='';
+    ['f-nome','f-cargo','f-setor','f-adm'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-stat').value='Ativo';
+  }
+  if(tipo==='treinamento'){
+    const fList=_cachedF.length?_cachedF:await API.get('funcionarios');
+    _cachedF=fList;
+    const picker=document.getElementById('t-emp-picker');
+    picker.innerHTML=fList.length?fList.map(f=>`<label class="emp-check"><input type="checkbox" value="${f.id}" onchange="updateEmpCount()"><div><div>${f.nome}</div><div class="ec-sub">${[f.cargo,f.setor].filter(Boolean).join(' · ')}</div></div></label>`).join(''):'<div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div>';
+    updateEmpCount();
+  }
+  const fNames=_cachedF.map(f=>f.nome);
+  const dlAc=document.getElementById('fl-ac');
+  if(dlAc)dlAc.innerHTML=fNames.map(n=>`<option value="${n}">`).join('');
+  document.getElementById('modal-'+tipo).classList.add('open');
+}
+
+function closeModal(tipo){document.getElementById('modal-'+tipo).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+function updateEmpCount(){const n=document.querySelectorAll('#t-emp-picker input:checked').length;const el=document.getElementById('t-emp-count');if(el)el.textContent=n+' selecionado'+(n!==1?'s':'');}
+
+// ── TREINAMENTOS ──
+async function renderT(search='') {
+  const all=await API.get('treinamentos'); _cachedT=all;
+  const fs=document.getElementById('t-fs')?.value||'';
+  const list=all.filter(r=>(r.nome+r.cat).toLowerCase().includes(search.toLowerCase())&&(!fs||r.status===fs));
+  const conc=all.filter(r=>r.status==='Concluído').length, ag=all.filter(r=>r.status==='Agendado').length;
+  const em=all.filter(r=>r.status==='Em Andamento').length, venc=all.filter(r=>r.status==='Vencido').length, tot=all.length;
+  const pct=n=>tot?Math.round(n/tot*100):0;
+  document.getElementById('t-cards').innerHTML=`
+    <div class="stat-card">${ring(tot,tot||1,'#4F46E5')}<div><div class="stat-lbl">Total</div><div class="stat-val">${tot}</div><div class="stat-pct">treinamentos</div></div></div>
+    <div class="stat-card">${ring(conc,tot||1,'#10B981')}<div><div class="stat-lbl">Concluídos</div><div class="stat-val">${conc}</div><div class="stat-pct">${pct(conc)}% do total</div></div></div>
+    <div class="stat-card">${ring(venc,tot||1,'#EF4444')}<div><div class="stat-lbl">Vencidos</div><div class="stat-val">${venc}</div><div class="stat-pct">${pct(venc)}% do total</div></div></div>
+    <div class="stat-card"><div class="icon-card" style="background:#EEF2FF"><i class="fa-solid fa-users" style="color:#4F46E5"></i></div><div><div class="stat-lbl">Participantes</div><div class="stat-val">${all.reduce((s,r)=>s+(r.funcs||[]).length,0)}</div><div class="stat-pct">total treinados</div></div></div>`;
+  const tbody=document.getElementById('tbody-t'), empty=document.getElementById('empty-t');
+  document.getElementById('t-cnt').textContent=`${list.length} registros`;
+  const catCls={NR:'cNR',SST:'cSST',Operacional:'cOp','Emergência':'cEm'};
+  const stCls={'Concluído':'b-ok','Agendado':'b-sched','Em Andamento':'b-prog','Vencido':'b-exp'};
+  document.querySelector('#page-treinamentos table')?.classList.add('tbl-clickable');
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    tbody.innerHTML=list.map((r,i)=>`<tr onclick="openTrainingDetail(${r.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></td><td style="color:var(--t2)">${fmt(r.ult)}</td><td style="color:var(--t2)">${fmt(r.prox)}</td><td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="color:var(--t2)">${(r.funcs||[]).length}</td><td><button class="ab" onclick="event.stopPropagation();delT(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+  }
+  donut('chart-ts',['Concluído','Agendado','Em Andamento','Vencido'],[conc,ag,em,venc],['#10B981','#8B5CF6','#3B82F6','#EF4444']);
+  const pv=all.filter(r=>r.prox&&svenc(r.prox)==='alert').sort((a,b)=>new Date(toISO(a.prox))-new Date(toISO(b.prox))).slice(0,6);
+  document.getElementById('t-vencer').innerHTML=pv.length?pv.map(r=>`<tr><td>${r.nome}</td><td>${fmt(r.prox)}</td></tr>`).join(''):'<tr><td colspan="2" style="color:var(--t3);text-align:center;padding:14px 0;font-size:12px">Nenhum nos próximos 30 dias</td></tr>';
+}
+
+async function saveT(){
+  const nv=document.getElementById('t-nome').value;
+  const nome=nv==='Outro'?document.getElementById('t-outro').value.trim():nv;
+  const ult=document.getElementById('t-ult').value;
+  if(!nome||!ult){alert('Preencha o nome e a data de realização.');return;}
+  const funcs=[...document.querySelectorAll('#t-emp-picker input:checked')].map(cb=>+cb.value);
+  try{await API.post('treinamentos',{nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value,ult,prox:document.getElementById('t-prox').value||null,status:document.getElementById('t-stat').value,ch:document.getElementById('t-ch').value||0,funcs});closeModal('treinamento');_cachedT=[];renderT();}catch(e){alert(e.message);}
+}
+async function delT(id){if(!confirm('Remover este treinamento?'))return;await API.del('treinamentos',id);_cachedT=[];renderT();}
+
+function openTrainingDetail(id){
+  const r=_cachedT.find(t=>t.id===id); if(!r)return;
+  const stCls={'Concluído':'b-ok','Agendado':'b-sched','Em Andamento':'b-prog','Vencido':'b-exp'};
+  const catCls={NR:'cNR',SST:'cSST',Operacional:'cOp','Emergência':'cEm'};
+  _tdEmps=r.funcs||[];
+  document.getElementById('td-page-nome').textContent=r.nome;
+  document.getElementById('td-page-sub').textContent=`${r.cat} · ${r.per} · ${_tdEmps.length} participante${_tdEmps.length!==1?'s':''}`;
+  document.getElementById('td-page-meta').innerHTML=`
+    <div class="detail-meta-card"><span class="dmc-label">Status</span><span style="margin-top:4px"><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></span></div>
+    <div class="detail-meta-card"><span class="dmc-label">Última Realização</span><span class="dmc-val">${fmt(r.ult)}</span></div>
+    <div class="detail-meta-card"><span class="dmc-label">Próxima Realização</span><span class="dmc-val">${fmt(r.prox)||'—'}</span></div>
+    <div class="detail-meta-card"><span class="dmc-label">Carga Horária</span><span class="dmc-val">${r.ch||0}h</span></div>
+    <div class="detail-meta-card"><span class="dmc-label">Participantes</span><span class="dmc-val">${_tdEmps.length}</span></div>
+    <div class="detail-meta-card"><span class="dmc-label">Categoria</span><span style="margin-top:4px"><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></span></div>`;
+  renderDetailEmps(_tdEmps);
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-treinamento-detalhe').classList.add('active');
+}
+function renderDetailEmps(list){
+  const tbody=document.getElementById('td-page-tbody'), empty=document.getElementById('td-page-empty');
+  document.getElementById('td-page-cnt').textContent=`${list.length} participante${list.length!==1?'s':''}`;
+  const sc={Ativo:'b-ok',Afastado:'b-alert',Desligado:'b-exp'};
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.map((f,i)=>`<tr class="emp-row" onclick="editF(${f.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td style="color:var(--t2)">${fmt(f.adm)}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td style="color:var(--t3);font-size:12px"><i class="fa-solid fa-pen-to-square"></i></td></tr>`).join('');
+}
+function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
+function voltarTreinamentos(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-treinamentos').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('[onclick*="treinamentos"]').classList.add('active');
+}
+
+// ── EXTINTORES ──
+async function renderEx(search=''){
+  const all=await API.get('extintores');
+  const fs=document.getElementById('ex-fs')?.value||'';
+  const list=all.filter(r=>{const s=sitEx(r.prox);const l={ok:'Em dia',alert:'Vencendo',exp:'Vencido'}[s];return(r.id_num+r.tipo+(r.local||'')).toLowerCase().includes(search.toLowerCase())&&(!fs||l===fs);});
+  const ok=all.filter(r=>sitEx(r.prox)==='ok').length, al=all.filter(r=>sitEx(r.prox)==='alert').length, venc=all.filter(r=>sitEx(r.prox)==='exp').length, tot=all.length;
+  document.getElementById('ex-cards').innerHTML=`
+    <div class="stat-card">${ring(tot,tot||1,'#4F46E5')}<div><div class="stat-lbl">Total</div><div class="stat-val">${tot}</div><div class="stat-pct">extintores</div></div></div>
+    <div class="stat-card">${ring(ok,tot||1,'#10B981')}<div><div class="stat-lbl">Em Dia</div><div class="stat-val">${ok}</div><div class="stat-pct">dentro do prazo</div></div></div>
+    <div class="stat-card">${ring(al,tot||1,'#F59E0B')}<div><div class="stat-lbl">Vencendo</div><div class="stat-val">${al}</div><div class="stat-pct">próximos 30 dias</div></div></div>
+    <div class="stat-card">${ring(venc,tot||1,'#EF4444')}<div><div class="stat-lbl">Vencidos</div><div class="stat-val">${venc}</div><div class="stat-pct">recarga necessária</div></div></div>`;
+  const tbody=document.getElementById('tbody-ex'), empty=document.getElementById('empty-ex');
+  document.getElementById('ex-cnt').textContent=`${list.length} registros`;
+  const sb={ok:'b-ok',alert:'b-alert',exp:'b-exp'}, sl={ok:'Em dia',alert:'Vencendo',exp:'Vencido'};
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.map((r,i)=>{const s=sitEx(r.prox);return`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:700">${r.id_num}</strong></td><td style="color:var(--t2)">${r.tipo||'—'}</td><td style="color:var(--t2)">${r.cap||'—'}</td><td style="color:var(--t2)">${r.local||'—'}</td><td style="color:var(--t2)">${fmt(r.ult)}</td><td style="color:var(--t2)">${fmt(r.prox)}</td><td><span class="badge ${sb[s]}"><span class="dot"></span>${sl[s]}</span></td><td><button class="ab" onclick="delEx(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;}).join('');
+}
+async function saveEx(){
+  const id_num=document.getElementById('ex-id').value.trim(), prox=document.getElementById('ex-prox').value;
+  if(!id_num||!prox){alert('Preencha a identificação e a próxima recarga.');return;}
+  try{await API.post('extintores',{id_num,tipo:document.getElementById('ex-tipo').value,cap:document.getElementById('ex-cap').value,local:document.getElementById('ex-local').value,ult:document.getElementById('ex-ult').value||null,prox,obs:document.getElementById('ex-obs').value});closeModal('extintor');renderEx();}catch(e){alert(e.message);}
+}
+async function delEx(id){if(!confirm('Remover este extintor?'))return;await API.del('extintores',id);renderEx();}
+
+// ── FUNCIONÁRIOS ──
+async function renderF(search=''){
+  const all=await API.get('funcionarios'); _cachedF=all;
+  const list=all.filter(r=>r.nome.toLowerCase().includes(search.toLowerCase()));
+  const tbody=document.getElementById('tbody-f'), empty=document.getElementById('empty-f');
+  document.getElementById('f-cnt').textContent=`${list.length} registros`;
+  const sc={Ativo:'b-ok',Afastado:'b-alert',Desligado:'b-exp'};
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td style="color:var(--t2)">${r.cargo||'—'}</td><td style="color:var(--t2)">${r.setor||'—'}</td><td style="color:var(--t2)">${fmt(r.adm)}</td><td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td><button class="ab" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+}
+function editF(id){
+  const f=_cachedF.find(r=>r.id===id); if(!f)return;
+  document.getElementById('f-modal-title').textContent='Editar Funcionário';
+  document.getElementById('f-edit-id').value=f.id;
+  document.getElementById('f-nome').value=f.nome||'';
+  document.getElementById('f-cargo').value=f.cargo||'';
+  document.getElementById('f-setor').value=f.setor||'';
+  document.getElementById('f-adm').value=f.adm?toISO(f.adm):'';
+  document.getElementById('f-stat').value=f.status||'Ativo';
+  document.getElementById('modal-funcionario').classList.add('open');
+}
+async function saveF(){
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){alert('Informe o nome.');return;}
+  const editId=+document.getElementById('f-edit-id').value;
+  const data={nome,cargo:document.getElementById('f-cargo').value,setor:document.getElementById('f-setor').value,adm:document.getElementById('f-adm').value||null,status:document.getElementById('f-stat').value};
+  try{
+    if(editId){const updated=await API.put('funcionarios',editId,data);_cachedF=_cachedF.map(f=>f.id===editId?updated:f);_tdEmps=_tdEmps.map(f=>f.id===editId?updated:f);}
+    else{await API.post('funcionarios',data);_cachedF=[];}
+    closeModal('funcionario');
+    if(document.getElementById('page-treinamento-detalhe').classList.contains('active'))renderDetailEmps(_tdEmps);
+    else renderF();
+  }catch(e){alert(e.message);}
+}
+async function delF(id){if(!confirm('Remover?'))return;await API.del('funcionarios',id);_cachedF=[];renderF();}
+
+// ── INSPEÇÕES ──
+async function renderI(search=''){
+  const all=await API.get('inspecoes');
+  const list=all.filter(r=>(r.local+(r.resp||'')).toLowerCase().includes((search||'').toLowerCase()));
+  const tbody=document.getElementById('tbody-i'), empty=document.getElementById('empty-i');
+  document.getElementById('i-cnt').textContent=`${list.length} registros`;
+  const rc={'Satisfatório':'b-ok','Parcialmente Satisfatório':'b-alert','Insatisfatório':'b-exp'};
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td>${r.local}</td><td style="color:var(--t2);white-space:nowrap">${fmt(r.data)}</td><td><span class="badge ${rc[r.res]||'b-ok'}"><span class="dot"></span>${r.res}</span></td><td><button class="ab" onclick="delI(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+}
+async function saveI(){
+  const local=document.getElementById('i-local').value.trim(), data=document.getElementById('i-data').value;
+  if(!local||!data){alert('Preencha o local e a data.');return;}
+  try{await API.post('inspecoes',{local,data,resp:document.getElementById('i-resp').value,res:document.getElementById('i-res').value,obs:document.getElementById('i-obs').value});closeModal('inspecao');renderI();}catch(e){alert(e.message);}
+}
+async function delI(id){if(!confirm('Remover?'))return;await API.del('inspecoes',id);renderI();}
+
+// ── ACIDENTES ──
+async function renderAc(search=''){
+  const all=await API.get('acidentes');
+  const list=all.filter(r=>(r.func+(r.tipo||'')).toLowerCase().includes((search||'').toLowerCase()));
+  const tbody=document.getElementById('tbody-ac'), empty=document.getElementById('empty-ac');
+  document.getElementById('ac-cnt').textContent=`${list.length} registros`;
+  const cc={Sim:'b-ok','Em processo':'b-alert','Não':'b-exp'};
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.func}</strong></td><td style="color:var(--t2);white-space:nowrap">${fmt(r.data)}</td><td style="color:var(--t2)">${r.tipo||'—'}</td><td><span class="badge ${cc[r.cat]||'b-alert'}"><span class="dot"></span>${r.cat}</span></td><td><button class="ab" onclick="delAc(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+}
+async function saveAc(){
+  const func=document.getElementById('ac-func').value.trim(), data=document.getElementById('ac-data').value;
+  if(!func||!data){alert('Preencha o funcionário e a data.');return;}
+  try{await API.post('acidentes',{func,data,tipo:document.getElementById('ac-tipo').value,descricao:document.getElementById('ac-desc').value,cat:document.getElementById('ac-cat').value});closeModal('acidente');renderAc();}catch(e){alert(e.message);}
+}
+async function delAc(id){if(!confirm('Remover?'))return;await API.del('acidentes',id);renderAc();}
+
+// ── RESIZE ──
+function noSelect(on){const v=on?'none':'';document.body.style.userSelect=v;document.body.style.webkitUserSelect=v;document.body.style.cursor=on?'col-resize':'';if(on)window.getSelection()?.removeAllRanges();}
+(function(){const sb=document.getElementById('sidebar'),h=document.getElementById('sb-resize');let a=false,sx,sw;h.addEventListener('mousedown',e=>{a=true;sx=e.clientX;sw=sb.offsetWidth;h.classList.add('dragging');noSelect(true);e.preventDefault();});document.addEventListener('mousemove',e=>{if(!a)return;sb.style.width=Math.min(340,Math.max(180,sw+(e.clientX-sx)))+'px';});document.addEventListener('mouseup',()=>{if(!a)return;a=false;h.classList.remove('dragging');noSelect(false);localStorage.setItem('sst_sb_w',sb.style.width);});const saved=localStorage.getItem('sst_sb_w');if(saved)sb.style.width=saved;})();
+(function(){document.querySelectorAll('.split-handle').forEach(h=>{const side=h.nextElementSibling,key='sst_split_'+(h.dataset.split||'');let a=false,sx,sw;h.addEventListener('mousedown',e=>{a=true;sx=e.clientX;sw=side.offsetWidth;h.classList.add('dragging');noSelect(true);e.preventDefault();});document.addEventListener('mousemove',e=>{if(!a)return;side.style.width=Math.min(420,Math.max(160,sw-(e.clientX-sx)))+'px';side.style.flexShrink='0';});document.addEventListener('mouseup',()=>{if(!a)return;a=false;h.classList.remove('dragging');noSelect(false);localStorage.setItem(key,side.style.width);});const saved=localStorage.getItem(key);if(saved){side.style.width=saved;side.style.flexShrink='0';}});})();
+
+renderInicio();
+</script>
+</body>
+</html>
