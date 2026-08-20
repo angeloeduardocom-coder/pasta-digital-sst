@@ -6,6 +6,7 @@
   <title>Gestão SST</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous"/>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
@@ -47,6 +48,10 @@
       overflow: hidden;
       color: var(--t1);
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      font-feature-settings: "kern" 1, "liga" 1;
+      line-height: 1.5;
     }
 
     /* ══════════════════ SIDEBAR ══════════════════ */
@@ -83,17 +88,17 @@
     }
 
     .sb-brand { color:#fff; }
-    .sb-brand .name { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
-    .sb-brand .tagline { font-size: 10.5px; color: rgba(255,255,255,.35); margin-top: 1px; font-weight: 500; }
+    .sb-brand .name { font-size: 15.5px; font-weight: 700; letter-spacing: -.3px; }
+    .sb-brand .tagline { font-size: 11px; color: rgba(255,255,255,.38); margin-top: 2px; font-weight: 500; letter-spacing: -.1px; }
 
     .sb-nav { flex: 1; padding: 14px 0; overflow-y: auto; }
 
     .sb-section {
-      padding: 12px 20px 4px;
-      font-size: 10px;
+      padding: 14px 20px 5px;
+      font-size: 10.5px;
       font-weight: 600;
-      letter-spacing: 1.2px;
-      color: rgba(255,255,255,.22);
+      letter-spacing: .9px;
+      color: rgba(255,255,255,.28);
       text-transform: uppercase;
     }
 
@@ -103,10 +108,11 @@
       gap: 10px;
       padding: 10px 16px;
       margin: 2px 8px;
-      color: rgba(255,255,255,.5);
+      color: rgba(255,255,255,.52);
       cursor: pointer;
       font-size: 13.5px;
       font-weight: 500;
+      letter-spacing: -.1px;
       border-radius: 8px;
       transition: all .18s ease;
       user-select: none;
@@ -135,7 +141,14 @@
       border-radius: 0 3px 3px 0;
     }
 
-    .nav-icon { font-size: 16px; width: 22px; text-align: center; }
+    .nav-icon { font-size: 14px; width: 22px; text-align: center; display:flex; align-items:center; justify-content:center; }
+    .nav-icon i { font-size: 13px; }
+    .sb-icon i  { font-size: 18px; color: #fff; }
+    .search-icon i { font-size: 12px; }
+    .ei i { font-size: 38px; opacity: .45; color: var(--t3); }
+    .ab i { font-size: 12px; }
+    .mtag i { font-size: 16px; color: var(--primary); }
+    .icon-card i { font-size: 20px; }
 
     .sb-footer {
       padding: 14px 20px;
@@ -158,28 +171,28 @@
       flex-shrink: 0;
     }
 
-    .sb-user .uname { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.7); }
-    .sb-user .urole { font-size: 10px; color: rgba(255,255,255,.3); }
+    .sb-user .uname { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.75); letter-spacing: -.1px; }
+    .sb-user .urole { font-size: 10.5px; color: rgba(255,255,255,.33); }
 
     /* ══════════════════ MAIN ══════════════════ */
     .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
     /* TOP BAR */
     .topbar {
-      background: var(--surface);
+      background: linear-gradient(to bottom, #ffffff, #FAFBFD);
       padding: 0 28px;
-      height: 64px;
+      height: 68px;
       display: flex;
       align-items: center;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       gap: 14px;
-      box-shadow: 0 1px 0 var(--border);
+      box-shadow: 0 1px 0 var(--border), 0 2px 8px rgba(0,0,0,.03);
     }
 
     .topbar-left { flex:1; }
-    .topbar-left h2 { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
-    .topbar-left .sub { font-size: 12px; color: var(--t3); margin-top: 1px; font-weight: 400; }
+    .topbar-left h2 { font-size: 20px; font-weight: 700; letter-spacing: -.45px; color: var(--t1); }
+    .topbar-left .sub { font-size: 13px; color: var(--t3); margin-top: 2px; font-weight: 400; letter-spacing: -.1px; }
 
     .btn-primary {
       display: inline-flex;
@@ -188,10 +201,11 @@
       background: linear-gradient(135deg, var(--primary), #818CF8);
       color: #fff;
       border: none;
-      padding: 9px 18px;
+      padding: 10px 20px;
       border-radius: 9px;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 600;
+      letter-spacing: -.1px;
       cursor: pointer;
       white-space: nowrap;
       font-family: inherit;
@@ -229,14 +243,15 @@
     .stat-card {
       background: var(--surface);
       border-radius: var(--radius);
-      padding: 14px 16px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       box-shadow: var(--shadow);
       border: 1px solid var(--border);
       transition: transform .2s, box-shadow .2s;
       min-width: 0;
+      will-change: transform;
     }
 
     .stat-card:hover {
@@ -244,15 +259,15 @@
       box-shadow: var(--shadow-md);
     }
 
-    .stat-ring { position:relative; width:52px; height:52px; flex-shrink:0; }
+    .stat-ring { position:relative; width:54px; height:54px; flex-shrink:0; }
     .stat-ring svg { transform:rotate(-90deg); }
-    .ring-bg   { fill:none; stroke:#F1F5F9; stroke-width:5; }
+    .ring-bg   { fill:none; stroke:#EFF2F7; stroke-width:5; }
     .ring-fill { fill:none; stroke-width:5; stroke-linecap:round; transition: stroke-dasharray .6s ease; }
-    .ring-lbl  { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--t1); }
+    .ring-lbl  { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:var(--t1); letter-spacing:-.5px; }
 
-    .stat-lbl { font-size:10px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.6px; }
-    .stat-val  { font-size:20px; font-weight:800; color:var(--t1); line-height:1.1; letter-spacing:-.5px; }
-    .stat-pct  { font-size:11px; color:var(--t3); margin-top:2px; }
+    .stat-lbl { font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:1px; }
+    .stat-val  { font-size:24px; font-weight:800; color:var(--t1); line-height:1; letter-spacing:-.8px; }
+    .stat-pct  { font-size:12px; color:var(--t3); margin-top:3px; font-weight:400; }
 
     .icon-card {
       width:52px; height:52px;
@@ -288,7 +303,7 @@
       background: #FAFBFD;
     }
 
-    .tcard-toolbar h3 { font-size:14px; font-weight:700; flex:1; color:var(--t1); }
+    .tcard-toolbar h3 { font-size:15px; font-weight:700; flex:1; color:var(--t1); letter-spacing:-.2px; }
 
     .search-box {
       display: flex;
@@ -339,7 +354,7 @@
       font-weight: 600;
       color: var(--t3);
       text-transform: uppercase;
-      letter-spacing: .6px;
+      letter-spacing: .55px;
       background: #FAFBFD;
       white-space: nowrap;
     }
@@ -350,7 +365,7 @@
     }
 
     tbody tr:hover { background: #FAFBFF; }
-    tbody td { padding: 12px 16px; font-size: 13px; color: var(--t1); }
+    tbody td { padding: 12px 16px; font-size: 13.5px; color: var(--t1); }
 
     .rn {
       width: 26px; height: 26px;
@@ -376,11 +391,11 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 10px;
+      padding: 4px 11px;
       border-radius: 20px;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
-      letter-spacing: .2px;
+      letter-spacing: .1px;
       white-space: nowrap;
     }
 
@@ -413,15 +428,15 @@
     }
 
     .chart-card h4 {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--t1);
       margin-bottom: 14px;
-      letter-spacing: -.1px;
+      letter-spacing: -.2px;
     }
 
     .vt { width:100%; border-collapse:collapse; }
-    .vt td { padding:7px 0; font-size:12.5px; border-bottom:1px solid #F1F5F9; }
+    .vt td { padding:7px 0; font-size:13px; border-bottom:1px solid #F1F5F9; }
     .vt td:first-child { color:var(--t1); font-weight:500; }
     .vt td:last-child { text-align:right; color:var(--yellow); font-weight:600; }
     .vt tr:last-child td { border-bottom:none; }
@@ -440,7 +455,7 @@
       opacity: .6;
     }
 
-    .empty p { font-size: 13.5px; line-height: 1.7; color: var(--t3); }
+    .empty p { font-size: 14px; line-height: 1.7; color: var(--t3); }
     .empty strong { color: var(--t2); }
 
     /* ══════════════════ ACT BTN ══════════════════ */
@@ -497,14 +512,14 @@
     @keyframes slideUp { from { transform:translateY(12px); opacity:0; } to { transform:translateY(0); opacity:1; } }
 
     .modal-title {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--t1);
       margin-bottom: 22px;
-      letter-spacing: -.3px;
+      letter-spacing: -.4px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .modal-title .mtag {
@@ -519,11 +534,11 @@
 
     .field label {
       display: block;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--t2);
       text-transform: uppercase;
-      letter-spacing: .6px;
+      letter-spacing: .5px;
       margin-bottom: 7px;
     }
 
@@ -532,7 +547,7 @@
       padding: 10px 13px;
       border: 1.5px solid var(--border);
       border-radius: 9px;
-      font-size: 13.5px;
+      font-size: 14px;
       color: var(--t1);
       background: var(--surface);
       outline: none;
@@ -597,6 +612,74 @@
     /* Divider in modal */
     .mdivider { height:1px; background:var(--border); margin:18px 0; }
 
+    /* ══════════════════ DASHBOARD ══════════════════ */
+    .dash-5 { grid-template-columns: repeat(5, 1fr) !important; }
+
+    .dash-charts-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .dash-charts-grid .chart-card {
+      padding: 12px 14px;
+    }
+
+    .dash-charts-grid .chart-card h4 {
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .dash-alert-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .dash-alert-banner {
+      background: #FFF7ED;
+      border: 1px solid #FED7AA;
+      border-radius: var(--radius);
+      padding: 12px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dash-alert-banner .ban-icon { font-size: 18px; flex-shrink: 0; }
+    .dash-alert-banner .ban-title { font-size: 13px; font-weight: 700; color: #92400E; }
+    .dash-alert-banner .ban-sub { font-size: 12px; color: #B45309; margin-top: 1px; }
+
+    .dash-resumo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      padding: 8px 0;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .dash-resumo-item:last-child { border-bottom: none; }
+    .dash-resumo-item .ri-label { color: var(--t2); font-weight: 500; }
+    .dash-resumo-item .ri-val { font-weight: 700; color: var(--t1); }
+    .dash-resumo-item .ri-val.ok { color: var(--green); }
+    .dash-resumo-item .ri-val.warn { color: var(--yellow); }
+    .dash-resumo-item .ri-val.bad { color: var(--red); }
+
+    .dash-date-chip {
+      background: var(--primary-l);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
@@ -609,7 +692,7 @@
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="sb-logo">
-    <div class="sb-icon">🦺</div>
+    <div class="sb-icon"><i class="fa-solid fa-shield-halved"></i></div>
     <div class="sb-brand">
       <div class="name">Gestão SST</div>
       <div class="tagline">Saúde e Segurança do Trabalho</div>
@@ -617,22 +700,26 @@
   </div>
 
   <div class="sb-nav">
+    <div class="nav-item active" onclick="go('inicio',this)">
+      <span class="nav-icon"><i class="fa-solid fa-house"></i></span> Início
+    </div>
+
     <div class="sb-section">Gestão</div>
-    <div class="nav-item active" onclick="go('treinamentos',this)">
-      <span class="nav-icon">📋</span> Treinamentos
+    <div class="nav-item" onclick="go('treinamentos',this)">
+      <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Treinamentos
     </div>
     <div class="nav-item" onclick="go('exames',this)">
-      <span class="nav-icon">🩺</span> ASO / Exames
+      <span class="nav-icon"><i class="fa-solid fa-stethoscope"></i></span> ASO / Exames
     </div>
 
     <div class="sb-section">Cadastros</div>
     <div class="nav-item" onclick="go('funcionarios',this)">
-      <span class="nav-icon">👥</span> Funcionários
+      <span class="nav-icon"><i class="fa-solid fa-users"></i></span> Funcionários
     </div>
 
     <div class="sb-section">Registros</div>
     <div class="nav-item" onclick="go('inspecoes',this)">
-      <span class="nav-icon">🔍</span> Inspeções / Acidentes
+      <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Inspeções / Acidentes
     </div>
   </div>
 
@@ -648,14 +735,63 @@
 <!-- ══ MAIN ══ -->
 <div class="main">
 
+  <!-- ── INÍCIO ── -->
+  <div id="page-inicio" class="page active">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>Início</h2>
+        <div class="sub">Visão geral do sistema SST</div>
+      </div>
+      <div class="dash-date-chip" id="dash-date-chip"></div>
+    </div>
+    <div class="page-body">
+      <div class="cards-row dash-5" id="dash-cards"></div>
+      <div id="dash-alerts"></div>
+
+      <div class="dash-charts-grid">
+        <div class="chart-card">
+          <h4>Treinamentos por Status</h4>
+          <canvas id="dash-ct" height="110"></canvas>
+        </div>
+        <div class="chart-card">
+          <h4>Exames por Situação</h4>
+          <canvas id="dash-ce" height="110"></canvas>
+        </div>
+        <div class="chart-card">
+          <h4>Funcionários por Status</h4>
+          <canvas id="dash-cf" height="110"></canvas>
+        </div>
+        <div class="chart-card">
+          <h4>Inspeções por Resultado</h4>
+          <canvas id="dash-ci" height="110"></canvas>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="split-main">
+          <div class="chart-card">
+            <h4>Próximos a Vencer</h4>
+            <table class="vt" id="dash-vencer"></table>
+          </div>
+        </div>
+        <div class="split-side">
+          <div class="chart-card">
+            <h4>📊 Resumo Geral</h4>
+            <div id="dash-resumo"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── TREINAMENTOS ── -->
-  <div id="page-treinamentos" class="page active">
+  <div id="page-treinamentos" class="page">
     <div class="topbar">
       <div class="topbar-left">
         <h2>Treinamentos</h2>
         <div class="sub">Gestão completa dos treinamentos da empresa</div>
       </div>
-      <button class="btn-primary" onclick="openModal('treinamento')">＋ Novo Treinamento</button>
+      <button class="btn-primary" onclick="openModal('treinamento')"><i class="fa-solid fa-plus"></i> Novo Treinamento</button>
     </div>
     <div class="page-body">
       <div class="cards-row" id="t-cards"></div>
@@ -664,7 +800,7 @@
           <div class="tcard">
             <div class="tcard-toolbar">
               <h3>Lista de Treinamentos</h3>
-              <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Buscar treinamento..." oninput="renderT(this.value)"/></div>
+              <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar treinamento..." oninput="renderT(this.value)"/></div>
               <select class="flt" id="t-fs" onchange="renderT()">
                 <option value="">Todos os status</option>
                 <option>Concluído</option><option>Agendado</option><option>Em Andamento</option><option>Vencido</option>
@@ -680,7 +816,7 @@
               <tbody id="tbody-t"></tbody>
             </table>
             <div id="empty-t" class="empty" style="display:none">
-              <span class="ei">📋</span>
+              <span class="ei"><i class="fa-regular fa-clipboard"></i></span>
               <p>Nenhum treinamento registrado ainda.<br>Clique em <strong>+ Novo Treinamento</strong> para começar.</p>
             </div>
             <div class="tfoot"><span id="t-cnt">0 registros</span></div>
@@ -692,7 +828,7 @@
             <canvas id="chart-ts" height="170"></canvas>
           </div>
           <div class="chart-card">
-            <h4>⏰ Próximos a Vencer</h4>
+            <h4>Próximos a Vencer</h4>
             <table class="vt" id="t-vencer">
               <tr><td colspan="2" style="color:var(--t3);text-align:center;padding:14px 0;font-size:12px">Nenhum nos próximos 30 dias</td></tr>
             </table>
@@ -709,7 +845,7 @@
         <h2>ASO / Exames Médicos</h2>
         <div class="sub">Controle de exames e atestados ocupacionais</div>
       </div>
-      <button class="btn-primary" onclick="openModal('exame')">＋ Novo Exame</button>
+      <button class="btn-primary" onclick="openModal('exame')"><i class="fa-solid fa-plus"></i> Novo Exame</button>
     </div>
     <div class="page-body">
       <div class="cards-row" id="e-cards"></div>
@@ -718,7 +854,7 @@
           <div class="tcard">
             <div class="tcard-toolbar">
               <h3>Lista de Exames</h3>
-              <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Buscar funcionário..." oninput="renderE(this.value)"/></div>
+              <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar funcionário..." oninput="renderE(this.value)"/></div>
               <select class="flt" id="e-ft" onchange="renderE()">
                 <option value="">Todos os tipos</option>
                 <option>Admissional</option><option>Periódico</option><option>Demissional</option>
@@ -737,7 +873,7 @@
             </table>
             </div>
             <div id="empty-e" class="empty" style="display:none">
-              <span class="ei">🩺</span>
+              <span class="ei"><i class="fa-solid fa-stethoscope"></i></span>
               <p>Nenhum exame registrado ainda.<br>Clique em <strong>+ Novo Exame</strong> para começar.</p>
             </div>
             <div class="tfoot"><span id="e-cnt">0 registros</span></div>
@@ -749,7 +885,7 @@
             <canvas id="chart-es" height="170"></canvas>
           </div>
           <div class="chart-card">
-            <h4>⏰ Próximos a Vencer</h4>
+            <h4>Próximos a Vencer</h4>
             <table class="vt" id="e-vencer">
               <tr><td colspan="2" style="color:var(--t3);text-align:center;padding:14px 0;font-size:12px">Nenhum nos próximos 30 dias</td></tr>
             </table>
@@ -766,13 +902,13 @@
         <h2>Funcionários</h2>
         <div class="sub">Cadastro de colaboradores da empresa</div>
       </div>
-      <button class="btn-primary" onclick="openModal('funcionario')">＋ Novo Funcionário</button>
+      <button class="btn-primary" onclick="openModal('funcionario')"><i class="fa-solid fa-plus"></i> Novo Funcionário</button>
     </div>
     <div class="page-body">
       <div class="tcard">
         <div class="tcard-toolbar">
           <h3>Lista de Funcionários</h3>
-          <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Buscar funcionário..." oninput="renderF(this.value)"/></div>
+          <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar funcionário..." oninput="renderF(this.value)"/></div>
         </div>
         <table>
           <thead>
@@ -781,7 +917,7 @@
           <tbody id="tbody-f"></tbody>
         </table>
         <div id="empty-f" class="empty" style="display:none">
-          <span class="ei">👥</span>
+          <span class="ei"><i class="fa-solid fa-users"></i></span>
           <p>Nenhum funcionário cadastrado.<br>Clique em <strong>+ Novo Funcionário</strong> para começar.</p>
         </div>
         <div class="tfoot"><span id="f-cnt">0 registros</span></div>
@@ -797,16 +933,16 @@
         <div class="sub">Registro de inspeções de segurança e ocorrências</div>
       </div>
       <div style="display:flex;gap:10px">
-        <button class="btn-primary" onclick="openModal('inspecao')">＋ Nova Inspeção</button>
-        <button class="btn-primary btn-danger" onclick="openModal('acidente')">＋ Acidente / CAT</button>
+        <button class="btn-primary" onclick="openModal('inspecao')"><i class="fa-solid fa-plus"></i> Nova Inspeção</button>
+        <button class="btn-primary btn-danger" onclick="openModal('acidente')"><i class="fa-solid fa-circle-exclamation"></i> Acidente / CAT</button>
       </div>
     </div>
     <div class="page-body">
       <div class="twin">
         <div class="tcard">
           <div class="tcard-toolbar">
-            <h3>🔍 Inspeções</h3>
-            <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Buscar..." oninput="renderI(this.value)"/></div>
+            <h3>Inspeções</h3>
+            <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar..." oninput="renderI(this.value)"/></div>
           </div>
           <div class="table-scroll">
           <table>
@@ -814,13 +950,13 @@
             <tbody id="tbody-i"></tbody>
           </table>
           </div>
-          <div id="empty-i" class="empty" style="display:none"><span class="ei">🔍</span><p>Nenhuma inspeção registrada.</p></div>
+          <div id="empty-i" class="empty" style="display:none"><span class="ei"><i class="fa-solid fa-magnifying-glass"></i></span><p>Nenhuma inspeção registrada.</p></div>
           <div class="tfoot"><span id="i-cnt">0 registros</span></div>
         </div>
         <div class="tcard">
           <div class="tcard-toolbar">
-            <h3>⚠️ Acidentes / CAT</h3>
-            <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Buscar..." oninput="renderAc(this.value)"/></div>
+            <h3>Acidentes / CAT</h3>
+            <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar..." oninput="renderAc(this.value)"/></div>
           </div>
           <div class="table-scroll">
           <table>
@@ -828,7 +964,7 @@
             <tbody id="tbody-ac"></tbody>
           </table>
           </div>
-          <div id="empty-ac" class="empty" style="display:none"><span class="ei">⚠️</span><p>Nenhum acidente registrado.</p></div>
+          <div id="empty-ac" class="empty" style="display:none"><span class="ei"><i class="fa-solid fa-triangle-exclamation"></i></span><p>Nenhum acidente registrado.</p></div>
           <div class="tfoot"><span id="ac-cnt">0 registros</span></div>
         </div>
       </div>
@@ -840,7 +976,7 @@
 <!-- ══ MODAIS ══ -->
 <div class="overlay" id="modal-treinamento">
   <div class="modal">
-    <div class="modal-title"><div class="mtag">📋</div> Novo Treinamento</div>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> Novo Treinamento</div>
     <div class="field">
       <label>Treinamento</label>
       <select id="t-nome" onchange="document.getElementById('t-outro-w').style.display=this.value==='Outro'?'block':'none'">
@@ -888,7 +1024,7 @@
 
 <div class="overlay" id="modal-exame">
   <div class="modal">
-    <div class="modal-title"><div class="mtag">🩺</div> Novo Exame Médico</div>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-stethoscope"></i></div> Novo Exame Médico</div>
     <div class="field"><label>Funcionário</label><input type="text" id="e-func" placeholder="Nome completo" list="fl-e"/><datalist id="fl-e"></datalist></div>
     <div class="frow">
       <div class="field">
@@ -914,7 +1050,7 @@
 
 <div class="overlay" id="modal-funcionario">
   <div class="modal">
-    <div class="modal-title"><div class="mtag">👥</div> Novo Funcionário</div>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-user-plus"></i></div> Novo Funcionário</div>
     <div class="field"><label>Nome Completo</label><input type="text" id="f-nome" placeholder="Nome completo"/></div>
     <div class="frow">
       <div class="field"><label>Cargo</label><input type="text" id="f-cargo" placeholder="Ex: Soldador"/></div>
@@ -936,7 +1072,7 @@
 
 <div class="overlay" id="modal-inspecao">
   <div class="modal">
-    <div class="modal-title"><div class="mtag">🔍</div> Nova Inspeção</div>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-magnifying-glass"></i></div> Nova Inspeção</div>
     <div class="frow">
       <div class="field"><label>Local</label><input type="text" id="i-local" placeholder="Ex: Almoxarifado"/></div>
       <div class="field"><label>Data</label><input type="date" id="i-data"/></div>
@@ -956,7 +1092,7 @@
 
 <div class="overlay" id="modal-acidente">
   <div class="modal">
-    <div class="modal-title"><div class="mtag" style="background:#FEE2E2">⚠️</div> Acidente / CAT</div>
+    <div class="modal-title"><div class="mtag" style="background:#FEE2E2"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i></div> Acidente / CAT</div>
     <div class="field"><label>Funcionário</label><input type="text" id="ac-func" placeholder="Nome completo" list="fl-ac"/><datalist id="fl-ac"></datalist></div>
     <div class="frow">
       <div class="field"><label>Data</label><input type="date" id="ac-data"/></div>
@@ -1001,30 +1137,36 @@ function svenc(v) {
 function slabel(s) { return { ok:'Em dia', alert:'Vencendo', exp:'Vencido' }[s]; }
 
 function ring(val, total, color) {
-  const r=22, c=2*Math.PI*r;
+  const r=23, c=2*Math.PI*r;
   const dash = total > 0 ? (val/total)*c : 0;
   return `<div class="stat-ring">
-    <svg viewBox="0 0 52 52" width="52" height="52">
-      <circle class="ring-bg" cx="26" cy="26" r="${r}"/>
-      <circle class="ring-fill" cx="26" cy="26" r="${r}" stroke="${color}" stroke-dasharray="${dash} ${c}"/>
+    <svg viewBox="0 0 54 54" width="54" height="54">
+      <circle class="ring-bg" cx="27" cy="27" r="${r}"/>
+      <circle class="ring-fill" cx="27" cy="27" r="${r}" stroke="${color}" stroke-dasharray="${dash} ${c}"/>
     </svg>
     <div class="ring-lbl">${val}</div>
   </div>`;
 }
 
-function donut(id, labels, data, colors) {
+function donut(id, labels, data, colors, cutout='80%') {
   if (charts[id]) charts[id].destroy();
   const ctx = document.getElementById(id);
   if (!ctx) return;
   charts[id] = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff', borderRadius: 5, hoverOffset: 6 }] },
     options: {
       responsive: true,
-      plugins: {
-        legend: { position:'bottom', labels:{ font:{ size:11, family:'Inter' }, boxWidth:12, padding:10 } }
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        duration: 1600,
+        easing: 'easeInOutQuart',
       },
-      cutout: '68%'
+      plugins: {
+        legend: { position:'bottom', labels:{ font:{ size:9, family:'Inter' }, boxWidth:8, padding:6 } }
+      },
+      cutout
     }
   });
 }
@@ -1034,7 +1176,103 @@ function go(page, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   el.classList.add('active');
-  ({ treinamentos:renderT, exames:renderE, funcionarios:renderF, inspecoes:() => { renderI(); renderAc(); } })[page]();
+  ({ inicio:renderInicio, treinamentos:renderT, exames:renderE, funcionarios:renderF, inspecoes:() => { renderI(); renderAc(); } })[page]();
+}
+
+// ── INÍCIO / DASHBOARD ──
+function renderInicio() {
+  const T  = DB.get(K.T);
+  const E  = DB.get(K.E);
+  const F  = DB.get(K.F);
+  const I  = DB.get(K.I);
+  const AC = DB.get(K.AC);
+
+  const dias = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const now = new Date();
+  const chip = document.getElementById('dash-date-chip');
+  if (chip) chip.textContent = `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
+
+  const fAtivos = F.filter(f => f.status === 'Ativo').length;
+  const tTot    = T.length;
+  const tVenc   = T.filter(r => r.status === 'Vencido').length;
+  const tConc   = T.filter(r => r.status === 'Concluído').length;
+  const tAg     = T.filter(r => r.status === 'Agendado').length;
+  const tEm     = T.filter(r => r.status === 'Em Andamento').length;
+  const eTot    = E.length;
+  const eOk     = E.filter(r => svenc(r.venc) === 'ok').length;
+  const eAlert  = E.filter(r => svenc(r.venc) === 'alert').length;
+  const eVenc   = E.filter(r => svenc(r.venc) === 'exp').length;
+  const iTot    = I.length;
+  const acTot   = AC.length;
+  const alertas = tVenc + eVenc + eAlert;
+
+  document.getElementById('dash-cards').innerHTML = `
+    <div class="stat-card">
+      <div class="icon-card" style="background:#EEF2FF"><i class="fa-solid fa-users" style="color:#4F46E5"></i></div>
+      <div><div class="stat-lbl">Funcionários</div><div class="stat-val">${fAtivos}</div><div class="stat-pct">${F.length} cadastrados</div></div>
+    </div>
+    <div class="stat-card">${ring(tConc, tTot||1, '#10B981')}
+      <div><div class="stat-lbl">Treinamentos</div><div class="stat-val">${tTot}</div><div class="stat-pct">${tVenc > 0 ? `${tVenc} vencido${tVenc>1?'s':''}` : 'tudo em dia'}</div></div>
+    </div>
+    <div class="stat-card">${ring(eOk, eTot||1, '#3B82F6')}
+      <div><div class="stat-lbl">Exames</div><div class="stat-val">${eTot}</div><div class="stat-pct">${eVenc > 0 ? `${eVenc} vencido${eVenc>1?'s':''}` : 'tudo em dia'}</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="icon-card" style="background:#ECFDF5"><i class="fa-solid fa-magnifying-glass" style="color:#10B981"></i></div>
+      <div><div class="stat-lbl">Inspeções</div><div class="stat-val">${iTot}</div><div class="stat-pct">${acTot} acidente${acTot!==1?'s':''}</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="icon-card" style="background:${alertas>0?'#FEE2E2':'#F0FDF4'}"><i class="fa-solid fa-${alertas>0?'circle-exclamation':'circle-check'}" style="color:${alertas>0?'var(--red)':'var(--green)'}"></i></div>
+      <div><div class="stat-lbl">Alertas</div><div class="stat-val" style="color:${alertas>0?'var(--red)':'var(--green)'}">${alertas}</div><div class="stat-pct">${alertas>0?'requerem atenção':'tudo em ordem'}</div></div>
+    </div>`;
+
+  const alertsEl = document.getElementById('dash-alerts');
+  const alertItems = [];
+  T.filter(r => r.status === 'Vencido').forEach(r => alertItems.push({ label: `Treinamento vencido: ${r.nome}`, cls: 'b-exp' }));
+  T.filter(r => r.prox && svenc(r.prox) === 'alert').forEach(r => alertItems.push({ label: `Vencendo em breve: ${r.nome}`, cls: 'b-alert' }));
+  E.filter(r => svenc(r.venc) === 'exp').forEach(r => alertItems.push({ label: `Exame vencido: ${r.func}`, cls: 'b-exp' }));
+  E.filter(r => svenc(r.venc) === 'alert').forEach(r => alertItems.push({ label: `Exame vencendo: ${r.func}`, cls: 'b-alert' }));
+
+  alertsEl.innerHTML = alertItems.length
+    ? `<div class="dash-alert-banner">
+        <span class="ban-icon"><i class="fa-solid fa-triangle-exclamation" style="color:#D97706"></i></span>
+        <div><div class="ban-title">${alertItems.length} item${alertItems.length>1?'s':''} requer${alertItems.length===1?'':'em'} atenção</div><div class="ban-sub">Verifique os itens vencidos ou prestes a vencer</div></div>
+        <div class="dash-alert-strip" style="margin:0;flex:1;justify-content:flex-end">
+          ${alertItems.slice(0,5).map(a=>`<span class="badge ${a.cls}"><span class="dot"></span>${a.label}</span>`).join('')}
+          ${alertItems.length>5?`<span class="badge b-alert"><span class="dot"></span>+${alertItems.length-5} mais</span>`:''}
+        </div>
+      </div>`
+    : '';
+
+  donut('dash-ct', ['Concluído','Agendado','Em Andamento','Vencido'], [tConc,tAg,tEm,tVenc], ['#10B981','#8B5CF6','#3B82F6','#EF4444']);
+  donut('dash-ce', ['Em Dia','Vencendo','Vencido'], [eOk,eAlert,eVenc], ['#10B981','#F59E0B','#EF4444']);
+
+  const fAtivo2  = F.filter(f => f.status === 'Ativo').length;
+  const fAfas    = F.filter(f => f.status === 'Afastado').length;
+  const fDeslig  = F.filter(f => f.status === 'Desligado').length;
+  donut('dash-cf', ['Ativo','Afastado','Desligado'], [fAtivo2,fAfas,fDeslig], ['#10B981','#F59E0B','#94A3B8']);
+
+  const iSat  = I.filter(r => r.res === 'Satisfatório').length;
+  const iPar  = I.filter(r => r.res === 'Parcialmente Satisfatório').length;
+  const iInsat= I.filter(r => r.res === 'Insatisfatório').length;
+  donut('dash-ci', ['Satisfatório','Parcial','Insatisfatório'], [iSat,iPar,iInsat], ['#10B981','#F59E0B','#EF4444']);
+
+  const pv = [];
+  T.filter(r => r.prox && svenc(r.prox) === 'alert').forEach(r => pv.push({ nome: r.nome, tipo: 'Treinamento', data: r.prox }));
+  E.filter(r => r.venc && svenc(r.venc) === 'alert').forEach(r => pv.push({ nome: r.func, tipo: 'Exame', data: r.venc }));
+  pv.sort((a,b) => new Date(a.data) - new Date(b.data));
+  document.getElementById('dash-vencer').innerHTML = pv.length
+    ? pv.slice(0,8).map(r => `<tr><td><span style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;display:block">${r.tipo}</span>${r.nome}</td><td>${fmt(r.data)}</td></tr>`).join('')
+    : '<tr><td colspan="2" style="color:var(--t3);text-align:center;padding:18px 0;font-size:12.5px">Nenhum nos próximos 30 dias</td></tr>';
+
+  document.getElementById('dash-resumo').innerHTML = [
+    { label:'Funcionários ativos', val: fAtivos > 0 ? `${fAtivos} / ${F.length}` : '—', cls: fAtivos > 0 ? 'ok' : '' },
+    { label:'Treinamentos concluídos', val: tTot > 0 ? `${tConc} / ${tTot}` : '—', cls: tVenc > 0 ? 'bad' : tConc > 0 ? 'ok' : '' },
+    { label:'Exames em dia', val: eTot > 0 ? `${eOk} / ${eTot}` : '—', cls: eVenc > 0 ? 'bad' : eOk > 0 ? 'ok' : '' },
+    { label:'Inspeções realizadas', val: iTot || '—', cls: '' },
+    { label:'Acidentes / CAT', val: acTot || '—', cls: acTot > 0 ? 'bad' : '' },
+  ].map(r => `<div class="dash-resumo-item"><span class="ri-label">${r.label}</span><span class="ri-val ${r.cls}">${r.val}</span></div>`).join('');
 }
 
 function openModal(tipo) {
@@ -1068,7 +1306,7 @@ function renderT(search='') {
     <div class="stat-card">${ring(tot,tot,'#4F46E5')}<div><div class="stat-lbl">Total</div><div class="stat-val">${tot}</div><div class="stat-pct">treinamentos</div></div></div>
     <div class="stat-card">${ring(conc,tot,'#10B981')}<div><div class="stat-lbl">Concluídos</div><div class="stat-val">${conc}</div><div class="stat-pct">${pct(conc)}% do total</div></div></div>
     <div class="stat-card">${ring(venc,tot,'#EF4444')}<div><div class="stat-lbl">Vencidos</div><div class="stat-val">${venc}</div><div class="stat-pct">${pct(venc)}% do total</div></div></div>
-    <div class="stat-card"><div class="icon-card" style="background:#EEF2FF">👥</div><div><div class="stat-lbl">Participantes</div><div class="stat-val">${part}</div><div class="stat-pct">total treinados</div></div></div>`;
+    <div class="stat-card"><div class="icon-card" style="background:#EEF2FF"><i class="fa-solid fa-users" style="color:#4F46E5"></i></div><div><div class="stat-lbl">Participantes</div><div class="stat-val">${part}</div><div class="stat-pct">total treinados</div></div></div>`;
 
   const tbody = document.getElementById('tbody-t');
   const empty = document.getElementById('empty-t');
@@ -1087,8 +1325,8 @@ function renderT(search='') {
       <td style="color:var(--t2)">${fmt(r.ult)}</td>
       <td style="color:var(--t2)">${fmt(r.prox)}</td>
       <td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td>
-      <td style="color:var(--t2)">👥 ${r.part||0}</td>
-      <td><button class="ab" onclick="delT(${r.id})" title="Remover">🗑️</button></td>
+      <td style="color:var(--t2)">${r.part||0}</td>
+      <td><button class="ab" onclick="delT(${r.id})" title="Remover"><i class="fa-solid fa-trash-can"></i></button></td>
     </tr>`).join('');
   }
 
@@ -1157,7 +1395,7 @@ function renderE(search='') {
         <td style="color:var(--t2)">${fmt(r.venc)}</td>
         <td style="color:var(--t2)">${r.res}</td>
         <td><span class="badge b-${s}"><span class="dot"></span>${slabel(s)}</span></td>
-        <td><button class="ab" onclick="delE(${r.id})">🗑️</button></td>
+        <td><button class="ab" onclick="delE(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td>
       </tr>`;
     }).join('');
   }
@@ -1205,7 +1443,7 @@ function renderF(search='') {
     <td style="color:var(--t2)">${r.setor||'—'}</td>
     <td style="color:var(--t2)">${fmt(r.adm)}</td>
     <td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td>
-    <td><button class="ab" onclick="delF(${r.id})">🗑️</button></td>
+    <td><button class="ab" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td>
   </tr>`).join('');
 }
 
@@ -1240,7 +1478,7 @@ function renderI(search='') {
     <td><span title="${r.local}">${r.local}</span></td>
     <td style="color:var(--t2);white-space:nowrap">${fmt(r.data)}</td>
     <td><span class="badge ${rc[r.res]||'b-ok'}"><span class="dot"></span>${r.res}</span></td>
-    <td><button class="ab" onclick="delI(${r.id})">🗑️</button></td>
+    <td><button class="ab" onclick="delI(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td>
   </tr>`).join('');
 }
 
@@ -1277,7 +1515,7 @@ function renderAc(search='') {
     <td style="color:var(--t2);white-space:nowrap">${fmt(r.data)}</td>
     <td><span class="tipo-cell" style="display:block;color:var(--t2)" title="${r.tipo}">${r.tipo}</span></td>
     <td><span class="badge ${cc[r.cat]||'b-alert'}"><span class="dot"></span>${r.cat}</span></td>
-    <td><button class="ab" onclick="delAc(${r.id})">🗑️</button></td>
+    <td><button class="ab" onclick="delAc(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td>
   </tr>`).join('');
 }
 
@@ -1298,7 +1536,7 @@ function delAc(id) {
   renderAc();
 }
 
-renderT();
+renderInicio();
 </script>
 </body>
 </html>
