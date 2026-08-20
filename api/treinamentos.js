@@ -1,15 +1,35 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
 
+function calcProx(ult, per) {
+  if (!ult) return null;
+  const d = new Date(ult);
+  const map = { 'Mensal':1, 'Trimestral':3, 'Semestral':6, 'Anual':12, 'Bienal':24, 'Quinquenal':60 };
+  const months = map[per] || 12;
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().split('T')[0];
+}
+
 module.exports = async (req, res) => {
   if (!requireAuth(req, res)) return;
 
   try {
     if (req.method === 'GET') {
+      await sql`ALTER TABLE treinamento_participantes ADD COLUMN IF NOT EXISTS data_realizacao DATE`;
       const rows = await sql`
         SELECT t.*,
+          CASE
+            WHEN t.prox IS NULL THEN 'Sem data'
+            WHEN t.prox < CURRENT_DATE THEN 'Vencido'
+            WHEN t.prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
+            ELSE 'Concluído'
+          END AS status,
           COALESCE(
-            json_agg(f.*) FILTER (WHERE f.id IS NOT NULL), '[]'
+            json_agg(json_build_object(
+              'id', f.id, 'nome', f.nome, 'cargo', f.cargo, 'setor', f.setor,
+              'adm', f.adm, 'status', f.status,
+              'data_realizacao', tp.data_realizacao
+            )) FILTER (WHERE f.id IS NOT NULL), '[]'
           ) AS funcs
         FROM treinamentos t
         LEFT JOIN treinamento_participantes tp ON tp.treinamento_id = t.id
@@ -24,9 +44,11 @@ module.exports = async (req, res) => {
       const { nome, cat, per, ult, prox, status, ch, funcs } = req.body;
       if (!nome || !ult) return res.status(400).json({ error: 'Nome e data obrigatórios' });
 
+      const proxFinal = prox || calcProx(ult, per || 'Anual');
+
       const [t] = await sql`
         INSERT INTO treinamentos (nome, cat, per, ult, prox, status, ch)
-        VALUES (${nome}, ${cat||'NR'}, ${per||'Anual'}, ${ult}, ${prox||null}, ${status||'Concluído'}, ${ch||0})
+        VALUES (${nome}, ${cat||'NR'}, ${per||'Anual'}, ${ult}, ${proxFinal}, 'auto', ${ch||0})
         RETURNING *
       `;
 
@@ -42,6 +64,12 @@ module.exports = async (req, res) => {
 
       const [full] = await sql`
         SELECT t.*,
+          CASE
+            WHEN t.prox IS NULL THEN 'Sem data'
+            WHEN t.prox < CURRENT_DATE THEN 'Vencido'
+            WHEN t.prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
+            ELSE 'Concluído'
+          END AS status,
           COALESCE(json_agg(f.*) FILTER (WHERE f.id IS NOT NULL), '[]') AS funcs
         FROM treinamentos t
         LEFT JOIN treinamento_participantes tp ON tp.treinamento_id = t.id
@@ -50,6 +78,28 @@ module.exports = async (req, res) => {
         GROUP BY t.id
       `;
       return res.json(full);
+    }
+
+    if (req.method === 'PUT') {
+      const { id } = req.query;
+      const { ult, per } = req.body;
+      if (!id || !ult) return res.status(400).json({ error: 'ID e data obrigatórios' });
+
+      const proxFinal = calcProx(ult, per || 'Anual');
+
+      const [t] = await sql`
+        UPDATE treinamentos
+        SET ult = ${ult}, prox = ${proxFinal}, per = COALESCE(${per||null}, per)
+        WHERE id = ${id}
+        RETURNING *,
+          CASE
+            WHEN prox IS NULL THEN 'Sem data'
+            WHEN prox < CURRENT_DATE THEN 'Vencido'
+            WHEN prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
+            ELSE 'Concluído'
+          END AS status
+      `;
+      return res.json(t);
     }
 
     if (req.method === 'DELETE') {

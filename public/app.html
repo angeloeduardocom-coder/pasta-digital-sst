@@ -173,9 +173,9 @@
     .btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(79,70,229,.45); }
 
     /* DASHBOARD */
-    .dash-charts-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
-    .dash-charts-grid .chart-card { padding:12px 14px; }
-    .dash-charts-grid .chart-card h4 { font-size:12px; margin-bottom:8px; }
+    .dash-charts-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:12px; }
+    .dash-charts-grid .chart-card { padding:8px 10px; }
+    .dash-charts-grid .chart-card h4 { font-size:11px; margin-bottom:5px; }
     .dash-alert-strip { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
     .dash-alert-banner { background:#FFF7ED; border:1px solid #FED7AA; border-radius:var(--radius); padding:12px 18px; margin-bottom:16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
     .dash-alert-banner .ban-icon { font-size:18px; flex-shrink:0; }
@@ -280,10 +280,10 @@
       <div id="dash-alerts"></div>
       <div id="dash-ext-alerta"></div>
       <div class="dash-charts-grid">
-        <div class="chart-card"><h4>Treinamentos por Status</h4><canvas id="dash-ct" height="110"></canvas></div>
-        <div class="chart-card"><h4>Extintores por Situação</h4><canvas id="dash-cex" height="110"></canvas></div>
-        <div class="chart-card"><h4>Funcionários por Status</h4><canvas id="dash-cf" height="110"></canvas></div>
-        <div class="chart-card"><h4>Inspeções por Resultado</h4><canvas id="dash-ci" height="110"></canvas></div>
+        <div class="chart-card"><h4>Treinamentos por Status</h4><canvas id="dash-ct" height="75"></canvas></div>
+        <div class="chart-card"><h4>Extintores por Situação</h4><canvas id="dash-cex" height="75"></canvas></div>
+        <div class="chart-card"><h4>Funcionários por Status</h4><canvas id="dash-cf" height="75"></canvas></div>
+        <div class="chart-card"><h4>Inspeções por Resultado</h4><canvas id="dash-ci" height="75"></canvas></div>
       </div>
       <div class="split">
         <div class="split-main">
@@ -453,6 +453,24 @@
   </div>
 
 </div><!-- /main -->
+
+<!-- MODAL RENOVAR PARTICIPANTE -->
+<div class="overlay" id="modal-renovar">
+  <div class="modal" style="width:360px">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-rotate"></i></div> Registrar Realização</div>
+    <input type="hidden" id="renovar-tid"/>
+    <input type="hidden" id="renovar-fid"/>
+    <p id="renovar-nome" style="font-size:13px;color:var(--t2);margin-bottom:14px"></p>
+    <div class="field">
+      <label>Data de Realização</label>
+      <input type="date" id="renovar-ult"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('renovar')">Cancelar</button>
+      <button class="btn-primary" onclick="saveRenovar()"><i class="fa-solid fa-check"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAIS -->
 <div class="overlay" id="modal-treinamento">
@@ -645,7 +663,7 @@ function donut(id, labels, data, colors) {
   charts[id] = new Chart(ctx, {
     type:'doughnut',
     data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#fff', borderRadius:5, hoverOffset:6 }] },
-    options:{ responsive:true, animation:{ animateRotate:true, animateScale:true, duration:1600, easing:'easeInOutQuart' }, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:9, family:'Inter' }, boxWidth:8, padding:6 } } }, cutout:'80%' }
+    options:{ responsive:true, animation:{ animateRotate:true, animateScale:true, duration:1600, easing:'easeInOutQuart' }, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:9, family:'Inter' }, boxWidth:8, padding:6 } } }, cutout:'88%' }
   });
 }
 
@@ -789,8 +807,32 @@ async function saveT(){
   try{await API.post('treinamentos',{nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value,ult,prox:document.getElementById('t-prox').value||null,status:document.getElementById('t-stat').value,ch:document.getElementById('t-ch').value||0,funcs});closeModal('treinamento');_cachedT=[];renderT();}catch(e){alert(e.message);}
 }
 async function delT(id){if(!confirm('Remover este treinamento?'))return;await API.del('treinamentos',id);_cachedT=[];renderT();}
+function openRenovarParticipante(tid,fid,nome,dataAtual){
+  document.getElementById('renovar-tid').value=tid;
+  document.getElementById('renovar-fid').value=fid;
+  document.getElementById('renovar-nome').textContent=nome;
+  document.getElementById('renovar-ult').value=dataAtual?dataAtual.split('T')[0]:new Date().toISOString().split('T')[0];
+  document.getElementById('modal-renovar').classList.add('open');
+}
+async function saveRenovar(){
+  const tid=document.getElementById('renovar-tid').value;
+  const fid=document.getElementById('renovar-fid').value;
+  const ult=document.getElementById('renovar-ult').value;
+  if(!ult){alert('Informe a data de realização.');return;}
+  try{
+    const r=await fetch('/api/participante',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('sst_token')},body:JSON.stringify({treinamento_id:+tid,funcionario_id:+fid,data_realizacao:ult})});
+    if(!r.ok){const e=await r.json();throw new Error(e.error);}
+    closeModal('renovar');
+    _cachedT=[];
+    const all=await API.get('treinamentos');_cachedT=all;
+    const tr=all.find(t=>t.id===+tid);
+    if(tr){_tdEmps=tr.funcs||[];renderDetailEmps(_tdEmps);}
+  }catch(e){alert(e.message);}
+}
 
+let _tdAtual=null;
 function openTrainingDetail(id){
+  _tdAtual=id;
   const r=_cachedT.find(t=>t.id===id); if(!r)return;
   const stCls={'Concluído':'b-ok','Agendado':'b-sched','Em Andamento':'b-prog','Vencido':'b-exp'};
   const catCls={NR:'cNR',SST:'cSST',Operacional:'cOp','Emergência':'cEm'};
@@ -814,7 +856,11 @@ function renderDetailEmps(list){
   const sc={Ativo:'b-ok',Afastado:'b-alert',Desligado:'b-exp'};
   if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=list.map((f,i)=>`<tr class="emp-row" onclick="editF(${f.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td style="color:var(--t2)">${fmt(f.adm)}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td style="color:var(--t3);font-size:12px"><i class="fa-solid fa-pen-to-square"></i></td></tr>`).join('');
+  const tid=_cachedT.find(t=>(t.funcs||[]).some(p=>list[0]&&p.id===list[0].id))?.id||document.getElementById('td-page-nome').dataset.tid;
+  tbody.innerHTML=list.map((f,i)=>{
+    const realizado=f.data_realizacao?`<span style="color:var(--green);font-size:12px"><i class="fa-solid fa-circle-check"></i> ${fmt(f.data_realizacao)}</span>`:`<span style="color:var(--t3);font-size:12px">Não registrado</span>`;
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td>${realizado}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td><button class="ab" title="Registrar realização" onclick="openRenovarParticipante(${_tdAtual},${f.id},'${f.nome.replace(/'/g,"\\'")}',${f.data_realizacao?`'${f.data_realizacao}'`:'null'})"><i class="fa-solid fa-rotate" style="color:var(--green)"></i></button></td></tr>`;
+  }).join('');
 }
 function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
 function voltarTreinamentos(){

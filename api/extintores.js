@@ -1,22 +1,56 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
 
+function calcProx(ult) {
+  if (!ult) return null;
+  const d = new Date(ult);
+  d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString().split('T')[0];
+}
+
+const statusQuery = sql => sql`
+  CASE
+    WHEN prox IS NULL THEN 'Sem data'
+    WHEN prox < CURRENT_DATE THEN 'Vencido'
+    WHEN prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
+    ELSE 'Em Dia'
+  END AS situacao
+`;
+
 module.exports = async (req, res) => {
   if (!requireAuth(req, res)) return;
 
   try {
     if (req.method === 'GET') {
-      const rows = await sql`SELECT * FROM extintores ORDER BY id_num ASC`;
+      const rows = await sql`
+        SELECT *,
+          CASE
+            WHEN prox IS NULL THEN 'Sem data'
+            WHEN prox < CURRENT_DATE THEN 'Vencido'
+            WHEN prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
+            ELSE 'Em Dia'
+          END AS situacao
+        FROM extintores ORDER BY id_num ASC
+      `;
       return res.json(rows);
     }
 
     if (req.method === 'POST') {
       const { id_num, tipo, cap, local, ult, prox, obs } = req.body;
-      if (!id_num || !prox) return res.status(400).json({ error: 'Identificação e próxima recarga obrigatórios' });
+      if (!id_num) return res.status(400).json({ error: 'Identificação obrigatória' });
+
+      const proxFinal = prox || calcProx(ult);
+
       const [row] = await sql`
         INSERT INTO extintores (id_num, tipo, cap, local, ult, prox, obs)
-        VALUES (${id_num}, ${tipo||null}, ${cap||null}, ${local||null}, ${ult||null}, ${prox}, ${obs||null})
-        RETURNING *
+        VALUES (${id_num}, ${tipo||null}, ${cap||null}, ${local||null}, ${ult||null}, ${proxFinal||null}, ${obs||null})
+        RETURNING *,
+          CASE
+            WHEN prox IS NULL THEN 'Sem data'
+            WHEN prox < CURRENT_DATE THEN 'Vencido'
+            WHEN prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
+            ELSE 'Em Dia'
+          END AS situacao
       `;
       return res.json(row);
     }
