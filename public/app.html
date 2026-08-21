@@ -387,7 +387,7 @@
               <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar treinamento..." oninput="renderT(this.value)"/></div>
               <select class="flt" id="t-fs" onchange="renderT()">
                 <option value="">Todos os status</option>
-                <option>Concluído</option><option>Agendado</option><option>Em Andamento</option><option>Vencido</option>
+                <option>Concluído</option><option>Vencendo</option><option>Vencido</option>
               </select>
             </div>
             <table><thead><tr><th>#</th><th>Treinamento</th><th>Categoria</th><th>Última Realização</th><th>Próxima Realização</th><th>Status</th><th>Part.</th><th></th></tr></thead>
@@ -534,7 +534,8 @@
 <!-- MODAIS -->
 <div class="overlay" id="modal-treinamento">
   <div class="modal">
-    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> Novo Treinamento</div>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> <span id="t-modal-title">Novo Treinamento</span></div>
+    <input type="hidden" id="t-edit-id"/>
     <div class="field">
       <label>Treinamento</label>
       <select id="t-nome" onchange="document.getElementById('t-outro-w').style.display=this.value==='Outro'?'block':'none'">
@@ -556,10 +557,7 @@
       <div class="field"><label>Última Realização</label><input type="date" id="t-ult"/></div>
       <div class="field"><label>Próxima Realização</label><input type="date" id="t-prox"/></div>
     </div>
-    <div class="frow">
-      <div class="field"><label>Status</label><select id="t-stat"><option>Concluído</option><option>Agendado</option><option>Em Andamento</option><option>Vencido</option></select></div>
-      <div class="field"><label>Carga Horária (h)</label><input type="number" id="t-ch" min="0" placeholder="0"/></div>
-    </div>
+    <div class="field"><label>Carga Horária (h)</label><input type="number" id="t-ch" min="0" placeholder="0"/></div>
     <div class="field">
       <label>Participantes</label>
       <div class="emp-picker" id="t-emp-picker"><div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div></div>
@@ -834,6 +832,16 @@ async function openModal(tipo) {
     document.getElementById('f-stat').value='Ativo';
   }
   if(tipo==='treinamento'){
+    document.getElementById('t-modal-title').textContent='Novo Treinamento';
+    document.getElementById('t-edit-id').value='';
+    document.getElementById('t-nome').value='';
+    document.getElementById('t-outro-w').style.display='none';
+    document.getElementById('t-outro').value='';
+    document.getElementById('t-cat').value='NR';
+    document.getElementById('t-per').value='Anual';
+    document.getElementById('t-ult').value='';
+    document.getElementById('t-prox').value='';
+    document.getElementById('t-ch').value='';
     const fList=_cachedF.length?_cachedF:await API.get('funcionarios');
     _cachedF=fList;
     const picker=document.getElementById('t-emp-picker');
@@ -866,12 +874,12 @@ async function renderT(search='') {
   const tbody=document.getElementById('tbody-t'), empty=document.getElementById('empty-t');
   document.getElementById('t-cnt').textContent=`${list.length} registros`;
   const catCls={NR:'cNR',SST:'cSST',Operacional:'cOp','Emergência':'cEm'};
-  const stCls={'Concluído':'b-ok','Agendado':'b-sched','Em Andamento':'b-prog','Vencido':'b-exp'};
+  const stCls={'Concluído':'b-ok','Vencendo':'b-alert','Vencido':'b-exp','Sem data':'b-sched'};
   document.querySelector('#page-treinamentos table')?.classList.add('tbl-clickable');
   if(!list.length){tbody.innerHTML='';empty.style.display='block';}
   else{
     empty.style.display='none';
-    tbody.innerHTML=list.map((r,i)=>`<tr onclick="openTrainingDetail(${r.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></td><td style="color:var(--t2)">${fmt(r.ult)}</td><td style="color:var(--t2)">${fmt(r.prox)}</td><td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="color:var(--t2)">${(r.funcs||[]).length}</td><td><button class="ab" onclick="event.stopPropagation();delT(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+    tbody.innerHTML=list.map((r,i)=>`<tr onclick="openTrainingDetail(${r.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></td><td style="color:var(--t2)">${fmt(r.ult)}</td><td style="color:var(--t2)">${fmt(r.prox)}</td><td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="color:var(--t2)">${(r.funcs||[]).length}</td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="event.stopPropagation();editT(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="event.stopPropagation();delT(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
   }
   donut('chart-ts',['Concluído','Agendado','Em Andamento','Vencido'],[conc,ag,em,venc],['#10B981','#8B5CF6','#3B82F6','#EF4444']);
   const pv=all.filter(r=>r.prox&&svenc(r.prox)==='alert').sort((a,b)=>new Date(toISO(a.prox))-new Date(toISO(b.prox))).slice(0,6);
@@ -884,9 +892,35 @@ async function saveT(){
   const ult=document.getElementById('t-ult').value;
   if(!nome||!ult){alert('Preencha o nome e a data de realização.');return;}
   const funcs=[...document.querySelectorAll('#t-emp-picker input:checked')].map(cb=>+cb.value);
-  try{await API.post('treinamentos',{nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value,ult,prox:document.getElementById('t-prox').value||null,status:document.getElementById('t-stat').value,ch:document.getElementById('t-ch').value||0,funcs});closeModal('treinamento');_cachedT=[];renderT();}catch(e){alert(e.message);}
+  const editId=document.getElementById('t-edit-id').value;
+  const data={nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value,ult,prox:document.getElementById('t-prox').value||null,ch:document.getElementById('t-ch').value||0,funcs};
+  try{
+    if(editId){await API.put('treinamentos',editId,data);}
+    else{await API.post('treinamentos',data);}
+    closeModal('treinamento');_cachedT=[];renderT();
+  }catch(e){alert(e.message);}
 }
 async function delT(id){if(!confirm('Remover este treinamento?'))return;await API.del('treinamentos',id);_cachedT=[];renderT();}
+async function editT(id){
+  const r=_cachedT.find(t=>t.id===id); if(!r)return;
+  const fList=_cachedF.length?_cachedF:await API.get('funcionarios'); _cachedF=fList;
+  document.getElementById('t-modal-title').textContent='Editar Treinamento';
+  document.getElementById('t-edit-id').value=r.id;
+  const nomeSel=document.getElementById('t-nome');
+  const nomes=[...nomeSel.options].map(o=>o.value);
+  if(nomes.includes(r.nome)){nomeSel.value=r.nome;document.getElementById('t-outro-w').style.display='none';}
+  else{nomeSel.value='Outro';document.getElementById('t-outro-w').style.display='block';document.getElementById('t-outro').value=r.nome;}
+  document.getElementById('t-cat').value=r.cat||'NR';
+  document.getElementById('t-per').value=r.per||'Anual';
+  document.getElementById('t-ult').value=r.ult?toISO(r.ult):'';
+  document.getElementById('t-prox').value=r.prox?toISO(r.prox):'';
+  document.getElementById('t-ch').value=r.ch||0;
+  const existing=(r.funcs||[]).map(f=>f.id);
+  const picker=document.getElementById('t-emp-picker');
+  picker.innerHTML=fList.length?fList.map(f=>`<label class="emp-check"><input type="checkbox" value="${f.id}" ${existing.includes(f.id)?'checked':''} onchange="updateEmpCount()"><div><div>${f.nome}</div><div class="ec-sub">${[f.cargo,f.setor].filter(Boolean).join(' · ')}</div></div></label>`).join(''):'<div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div>';
+  updateEmpCount();
+  document.getElementById('modal-treinamento').classList.add('open');
+}
 function openRenovarParticipante(tid,fid,nome,dataAtual){
   document.getElementById('renovar-tid').value=tid;
   document.getElementById('renovar-fid').value=fid;
@@ -914,7 +948,7 @@ let _tdAtual=null;
 function openTrainingDetail(id){
   _tdAtual=id;
   const r=_cachedT.find(t=>t.id===id); if(!r)return;
-  const stCls={'Concluído':'b-ok','Agendado':'b-sched','Em Andamento':'b-prog','Vencido':'b-exp'};
+  const stCls={'Concluído':'b-ok','Vencendo':'b-alert','Vencido':'b-exp','Sem data':'b-sched'};
   const catCls={NR:'cNR',SST:'cSST',Operacional:'cOp','Emergência':'cEm'};
   _tdEmps=r.funcs||[];
   document.getElementById('td-page-nome').textContent=r.nome;

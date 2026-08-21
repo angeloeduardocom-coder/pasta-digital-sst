@@ -82,24 +82,52 @@ module.exports = async (req, res) => {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const { ult, per } = req.body;
+      const { nome, cat, per, ult, prox, ch, funcs } = req.body;
       if (!id || !ult) return res.status(400).json({ error: 'ID e data obrigatórios' });
 
-      const proxFinal = calcProx(ult, per || 'Anual');
+      const proxFinal = prox || calcProx(ult, per || 'Anual');
 
-      const [t] = await sql`
+      await sql`
         UPDATE treinamentos
-        SET ult = ${ult}, prox = ${proxFinal}, per = COALESCE(${per||null}, per)
-        WHERE id = ${id}
-        RETURNING *,
-          CASE
-            WHEN prox IS NULL THEN 'Sem data'
-            WHEN prox < CURRENT_DATE THEN 'Vencido'
-            WHEN prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
-            ELSE 'Concluído'
-          END AS status
+        SET nome=COALESCE(${nome||null}, nome), cat=COALESCE(${cat||null}, cat),
+            per=${per||'Anual'}, ult=${ult}, prox=${proxFinal}, ch=${ch||0}
+        WHERE id=${id}
       `;
-      return res.json(t);
+
+      if (Array.isArray(funcs)) {
+        await sql`DELETE FROM treinamento_participantes WHERE treinamento_id=${id}`;
+        for (const fid of funcs) {
+          await sql`
+            INSERT INTO treinamento_participantes (treinamento_id, funcionario_id)
+            VALUES (${id}, ${fid})
+            ON CONFLICT DO NOTHING
+          `;
+        }
+      }
+
+      await sql`ALTER TABLE treinamento_participantes ADD COLUMN IF NOT EXISTS data_realizacao DATE`;
+      const [full] = await sql`
+        SELECT t.*,
+          CASE
+            WHEN t.prox IS NULL THEN 'Sem data'
+            WHEN t.prox < CURRENT_DATE THEN 'Vencido'
+            WHEN t.prox <= CURRENT_DATE + INTERVAL '30 days' THEN 'Vencendo'
+            ELSE 'Concluído'
+          END AS status,
+          COALESCE(
+            json_agg(json_build_object(
+              'id', f.id, 'nome', f.nome, 'cargo', f.cargo, 'setor', f.setor,
+              'adm', f.adm, 'status', f.status,
+              'data_realizacao', tp.data_realizacao
+            )) FILTER (WHERE f.id IS NOT NULL), '[]'
+          ) AS funcs
+        FROM treinamentos t
+        LEFT JOIN treinamento_participantes tp ON tp.treinamento_id = t.id
+        LEFT JOIN funcionarios f ON f.id = tp.funcionario_id
+        WHERE t.id = ${id}
+        GROUP BY t.id
+      `;
+      return res.json(full);
     }
 
     if (req.method === 'DELETE') {
