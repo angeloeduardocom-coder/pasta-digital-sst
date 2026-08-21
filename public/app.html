@@ -568,7 +568,8 @@
 
 <div class="overlay" id="modal-extintor">
   <div class="modal">
-    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-fire-extinguisher"></i></div> Novo Extintor</div>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-fire-extinguisher"></i></div> <span id="ex-modal-title">Novo Extintor</span></div>
+    <input type="hidden" id="ex-edit-id"/>
     <div class="frow">
       <div class="field"><label>Identificação / Nº</label><input type="text" id="ex-id" placeholder="Ex: EXT-01"/></div>
       <div class="field"><label>Tipo</label><select id="ex-tipo"><option>Pó Químico Seco (ABC)</option><option>Pó Químico Seco (BC)</option><option>CO² (Dióxido de Carbono)</option><option>Água Pressurizada</option><option>Espuma Mecânica</option></select></div>
@@ -684,7 +685,7 @@ const API = {
 };
 
 const charts = {};
-let _cachedT=[], _cachedF=[], _tdEmps=[];
+let _cachedT=[], _cachedF=[], _cachedEx=[], _tdEmps=[];
 
 function fmt(d) {
   if (!d) return '—';
@@ -821,6 +822,13 @@ async function renderInicio() {
 
 // ── MODAL ──
 async function openModal(tipo) {
+  if(tipo==='extintor'){
+    document.getElementById('ex-modal-title').textContent='Novo Extintor';
+    document.getElementById('ex-edit-id').value='';
+    ['ex-id','ex-local','ex-ult','ex-prox','ex-obs'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('ex-tipo').selectedIndex=0;
+    document.getElementById('ex-cap').selectedIndex=0;
+  }
   if(tipo==='funcionario'){
     document.getElementById('f-modal-title').textContent='Novo Funcionário';
     document.getElementById('f-edit-id').value='';
@@ -984,7 +992,7 @@ function voltarTreinamentos(){
 
 // ── EXTINTORES ──
 async function renderEx(search=''){
-  const all=await API.get('extintores');
+  const all=await API.get('extintores'); _cachedEx=all;
   const fs=document.getElementById('ex-fs')?.value||'';
   const list=all.filter(r=>{const s=sitEx(r.prox);const l={ok:'Em dia',alert:'Vencendo',exp:'Vencido'}[s];return(r.id_num+r.tipo+(r.local||'')).toLowerCase().includes(search.toLowerCase())&&(!fs||l===fs);});
   const ok=all.filter(r=>sitEx(r.prox)==='ok').length, al=all.filter(r=>sitEx(r.prox)==='alert').length, venc=all.filter(r=>sitEx(r.prox)==='exp').length, tot=all.length;
@@ -998,14 +1006,34 @@ async function renderEx(search=''){
   const sb={ok:'b-ok',alert:'b-alert',exp:'b-exp'}, sl={ok:'Em dia',alert:'Vencendo',exp:'Vencido'};
   if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=list.map((r,i)=>{const s=sitEx(r.prox);return`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:700">${r.id_num}</strong></td><td style="color:var(--t2)">${r.tipo||'—'}</td><td style="color:var(--t2)">${r.cap||'—'}</td><td style="color:var(--t2)">${r.local||'—'}</td><td style="color:var(--t2)">${fmt(r.ult)}</td><td style="color:var(--t2)">${fmt(r.prox)}</td><td><span class="badge ${sb[s]}"><span class="dot"></span>${sl[s]}</span></td><td><button class="ab" onclick="delEx(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;}).join('');
+  document.querySelector('#page-extintores table')?.classList.add('tbl-clickable');
+  tbody.innerHTML=list.map((r,i)=>{const s=sitEx(r.prox);return`<tr onclick="editEx(${r.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:700">${r.id_num}</strong></td><td style="color:var(--t2)">${r.tipo||'—'}</td><td style="color:var(--t2)">${r.cap||'—'}</td><td style="color:var(--t2)">${r.local||'—'}</td><td style="color:var(--t2)">${fmt(r.ult)}</td><td style="color:var(--t2)">${fmt(r.prox)}</td><td><span class="badge ${sb[s]}"><span class="dot"></span>${sl[s]}</span></td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="event.stopPropagation();editEx(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="event.stopPropagation();delEx(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;}).join('');
 }
 async function saveEx(){
   const id_num=document.getElementById('ex-id').value.trim(), prox=document.getElementById('ex-prox').value;
   if(!id_num||!prox){alert('Preencha a identificação e a próxima recarga.');return;}
-  try{await API.post('extintores',{id_num,tipo:document.getElementById('ex-tipo').value,cap:document.getElementById('ex-cap').value,local:document.getElementById('ex-local').value,ult:document.getElementById('ex-ult').value||null,prox,obs:document.getElementById('ex-obs').value});closeModal('extintor');renderEx();}catch(e){alert(e.message);}
+  const editId=document.getElementById('ex-edit-id').value;
+  const data={id_num,tipo:document.getElementById('ex-tipo').value,cap:document.getElementById('ex-cap').value,local:document.getElementById('ex-local').value,ult:document.getElementById('ex-ult').value||null,prox,obs:document.getElementById('ex-obs').value};
+  try{
+    if(editId){await API.put('extintores',editId,data);}
+    else{await API.post('extintores',data);}
+    closeModal('extintor');_cachedEx=[];renderEx();
+  }catch(e){alert(e.message);}
 }
-async function delEx(id){if(!confirm('Remover este extintor?'))return;await API.del('extintores',id);renderEx();}
+async function delEx(id){if(!confirm('Remover este extintor?'))return;await API.del('extintores',id);_cachedEx=[];renderEx();}
+function editEx(id){
+  const r=_cachedEx.find(e=>e.id===id); if(!r)return;
+  document.getElementById('ex-modal-title').textContent='Editar Extintor';
+  document.getElementById('ex-edit-id').value=r.id;
+  document.getElementById('ex-id').value=r.id_num||'';
+  document.getElementById('ex-tipo').value=r.tipo||document.getElementById('ex-tipo').options[0].value;
+  document.getElementById('ex-cap').value=r.cap||document.getElementById('ex-cap').options[0].value;
+  document.getElementById('ex-local').value=r.local||'';
+  document.getElementById('ex-ult').value=r.ult?toISO(r.ult):'';
+  document.getElementById('ex-prox').value=r.prox?toISO(r.prox):'';
+  document.getElementById('ex-obs').value=r.obs||'';
+  document.getElementById('modal-extintor').classList.add('open');
+}
 
 // ── FUNCIONÁRIOS ──
 async function renderF(search=''){
