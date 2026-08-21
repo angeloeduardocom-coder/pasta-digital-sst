@@ -142,6 +142,7 @@
     .ab { background:none; border:none; cursor:pointer; padding:5px 7px; border-radius:7px; font-size:14px; color:var(--t3); transition:all .15s; }
     .ab:hover { background:#FEE2E2; color:var(--red); }
     .ab i { font-size:12px; }
+    .ab-edit:hover { background:#EEF2FF; color:var(--primary); }
 
     /* TWIN */
     .twin { display:flex; gap:16px; align-items:stretch; }
@@ -173,9 +174,15 @@
     .btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(79,70,229,.45); }
 
     /* DASHBOARD */
-    .dash-charts-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:12px; }
-    .dash-charts-grid .chart-card { padding:8px 10px; }
-    .dash-charts-grid .chart-card h4 { font-size:11px; margin-bottom:5px; }
+    .dash-charts-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
+    .dash-charts-grid .chart-card { padding:10px 12px; }
+    .dash-charts-grid .chart-card h4 { font-size:11px; margin-bottom:6px; }
+    .dash-charts-grid .chart-card { animation:chartIn .45s ease both; }
+    .dash-charts-grid .chart-card:nth-child(1) { animation-delay:.05s; }
+    .dash-charts-grid .chart-card:nth-child(2) { animation-delay:.15s; }
+    .dash-charts-grid .chart-card:nth-child(3) { animation-delay:.25s; }
+    .dash-charts-grid .chart-card:nth-child(4) { animation-delay:.35s; }
+    @keyframes chartIn { from{opacity:0;transform:translateY(10px) scale(.96)} to{opacity:1;transform:none} }
     .dash-alert-strip { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
     .dash-alert-banner { background:#FFF7ED; border:1px solid #FED7AA; border-radius:var(--radius); padding:12px 18px; margin-bottom:16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
     .dash-alert-banner .ban-icon { font-size:18px; flex-shrink:0; }
@@ -214,19 +221,71 @@
     .detail-empty p { font-size:15px; line-height:1.7; }
     .tbl-clickable tbody tr { cursor:pointer; }
     .tbl-clickable tbody tr:hover { background:#F0F4FF !important; }
+    .btn-data-edit { display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:7px; border:1.5px solid #D1FAE5; background:#F0FDF4; color:#065F46; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; white-space:nowrap; }
+    .btn-data-edit:hover { background:#D1FAE5; border-color:#6EE7B7; }
+    .btn-data-empty { border-color:#E2E8F0; background:#F8FAFC; color:#94A3B8; }
+    .btn-data-empty:hover { background:#EEF2FF; border-color:#C7D2FE; color:#4F46E5; }
 
     /* SCROLLBAR */
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:10px; }
     ::-webkit-scrollbar-thumb:hover { background:#94A3B8; }
+
+    /* RESPONSIVE */
+    .sb-toggle { display:none; align-items:center; justify-content:center; background:none; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; color:var(--t2); font-size:15px; flex-shrink:0; padding:0 10px; height:36px; transition:background .15s; }
+    .sb-toggle:hover { background:#F1F5F9; }
+    .sb-close { display:none; position:absolute; top:14px; right:12px; background:none; border:none; cursor:pointer; color:rgba(255,255,255,.38); font-size:18px; padding:4px; transition:color .15s; z-index:1; }
+    .sb-close:hover { color:rgba(255,255,255,.8); }
+    .sb-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:150; }
+    .sb-overlay.open { display:block; }
+
+    @media (max-width:900px) {
+      .sidebar { position:fixed !important; left:-270px; top:0; bottom:0; width:260px !important; z-index:200; transition:left .28s cubic-bezier(.4,0,.2,1); }
+      .sidebar.sb-open { left:0 !important; box-shadow:8px 0 40px rgba(0,0,0,.35); }
+      .sb-toggle { display:inline-flex; }
+      .sb-close { display:block; }
+      .sb-resize { display:none !important; }
+      .topbar { padding:10px 14px; height:auto; min-height:60px; flex-wrap:wrap; gap:8px; }
+      .topbar-left h2 { font-size:17px; }
+      .topbar-left .sub { font-size:12px; }
+      .page-body { padding:14px 12px; }
+      .cards-row { grid-template-columns:repeat(2,1fr) !important; }
+      .split { flex-direction:column; }
+      .split-main { margin-right:0; margin-bottom:12px; }
+      .split-side { width:100% !important; flex-shrink:1 !important; margin-left:0; display:flex; flex-direction:row; flex-wrap:wrap; gap:12px; }
+      .split-side > * { flex:1; min-width:220px; }
+      .split-handle { display:none !important; }
+      .dash-charts-grid { grid-template-columns:repeat(2,1fr) !important; }
+      .twin { flex-direction:column; }
+      .twin .tcard { min-height:280px; }
+      .tcard { overflow-x:auto; }
+      .frow { flex-direction:column; gap:0; }
+      .frow .field { flex:none; }
+      .modal { width:100% !important; padding:22px 18px; }
+      .overlay { padding:12px; align-items:flex-end; }
+      .modal { border-radius:16px 16px 0 0; max-height:92vh; }
+    }
+
+    @media (max-width:520px) {
+      .cards-row { grid-template-columns:1fr !important; }
+      .dash-charts-grid { grid-template-columns:1fr; }
+      .btn-primary { font-size:12.5px; padding:8px 14px; }
+      .tcard-toolbar { flex-wrap:wrap; }
+      .search-box input { width:100px; }
+      .topbar-left { flex:0 0 100%; order:-1; }
+      .dash-date-chip { display:none; }
+    }
   </style>
 </head>
 <body>
 
+<div class="sb-overlay" id="sb-overlay"></div>
+
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-resize" id="sb-resize"></div>
+  <button class="sb-close" id="sb-close"><i class="fa-solid fa-xmark"></i></button>
   <div class="sb-logo">
     <div class="sb-icon"><i class="fa-solid fa-shield-halved"></i></div>
     <div class="sb-brand">
@@ -280,10 +339,10 @@
       <div id="dash-alerts"></div>
       <div id="dash-ext-alerta"></div>
       <div class="dash-charts-grid">
-        <div class="chart-card"><h4>Treinamentos por Status</h4><canvas id="dash-ct" height="75"></canvas></div>
-        <div class="chart-card"><h4>Extintores por Situação</h4><canvas id="dash-cex" height="75"></canvas></div>
-        <div class="chart-card"><h4>Funcionários por Status</h4><canvas id="dash-cf" height="75"></canvas></div>
-        <div class="chart-card"><h4>Inspeções por Resultado</h4><canvas id="dash-ci" height="75"></canvas></div>
+        <div class="chart-card"><h4>Treinamentos por Status</h4><canvas id="dash-ct" height="110"></canvas></div>
+        <div class="chart-card"><h4>Extintores por Situação</h4><canvas id="dash-cex" height="110"></canvas></div>
+        <div class="chart-card"><h4>Funcionários por Status</h4><canvas id="dash-cf" height="110"></canvas></div>
+        <div class="chart-card"><h4>Inspeções por Resultado</h4><canvas id="dash-ci" height="110"></canvas></div>
       </div>
       <div class="split">
         <div class="split-main">
@@ -441,7 +500,7 @@
           <h3>Colaboradores Participantes</h3>
           <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar colaborador..." oninput="filterDetailEmps(this.value)"/></div>
         </div>
-        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Admissão</th><th>Status</th><th></th></tr></thead>
+        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Realização do Treinamento</th></tr></thead>
         <tbody id="td-page-tbody"></tbody></table>
         <div id="td-page-empty" class="detail-empty" style="display:none">
           <i class="fa-solid fa-users"></i>
@@ -656,14 +715,35 @@ function ring(val, total, color) {
   return `<div class="stat-ring"><svg viewBox="0 0 54 54" width="54" height="54"><circle class="ring-bg" cx="27" cy="27" r="${r}"/><circle class="ring-fill" cx="27" cy="27" r="${r}" stroke="${color}" stroke-dasharray="${dash} ${c}"/></svg><div class="ring-lbl">${val}</div></div>`;
 }
 
+const centerTextPlugin = {
+  id:'centerText',
+  afterDraw(chart) {
+    const {ctx,data,chartArea:{top,bottom,left,right}} = chart;
+    const total = data.datasets[0].data.reduce((a,b)=>a+b,0);
+    if(!total) return;
+    const active = chart._active?.length ? data.datasets[0].data[chart._active[0].index] : null;
+    const val = active ?? total;
+    const pct = Math.round(val/total*100);
+    const cx=(left+right)/2, cy=(top+bottom)/2;
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#0F172A'; ctx.font='700 13px Inter,sans-serif';
+    ctx.fillText(val, cx, cy-7);
+    ctx.fillStyle='#94A3B8'; ctx.font='500 9px Inter,sans-serif';
+    ctx.fillText(pct+'%', cx, cy+6);
+    ctx.restore();
+  }
+};
+
 function donut(id, labels, data, colors) {
   if (charts[id]) charts[id].destroy();
   const ctx = document.getElementById(id);
   if (!ctx) return;
   charts[id] = new Chart(ctx, {
     type:'doughnut',
-    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#fff', borderRadius:5, hoverOffset:6 }] },
-    options:{ responsive:true, animation:{ animateRotate:true, animateScale:true, duration:1600, easing:'easeInOutQuart' }, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:9, family:'Inter' }, boxWidth:8, padding:6 } } }, cutout:'88%' }
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#fff', borderRadius:5, hoverOffset:10 }] },
+    options:{ responsive:true, animation:{ animateRotate:true, animateScale:true, duration:800, easing:'easeOutBack', delay(c){ return c.dataIndex * 130; } }, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:9, family:'Inter' }, boxWidth:8, padding:6 } } }, cutout:'72%' },
+    plugins:[centerTextPlugin]
   });
 }
 
@@ -858,8 +938,10 @@ function renderDetailEmps(list){
   empty.style.display='none';
   const tid=_cachedT.find(t=>(t.funcs||[]).some(p=>list[0]&&p.id===list[0].id))?.id||document.getElementById('td-page-nome').dataset.tid;
   tbody.innerHTML=list.map((f,i)=>{
-    const realizado=f.data_realizacao?`<span style="color:var(--green);font-size:12px"><i class="fa-solid fa-circle-check"></i> ${fmt(f.data_realizacao)}</span>`:`<span style="color:var(--t3);font-size:12px">Não registrado</span>`;
-    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td>${realizado}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td><button class="ab" title="Registrar realização" onclick="openRenovarParticipante(${_tdAtual},${f.id},'${f.nome.replace(/'/g,"\\'")}',${f.data_realizacao?`'${f.data_realizacao}'`:'null'})"><i class="fa-solid fa-rotate" style="color:var(--green)"></i></button></td></tr>`;
+    const dataBtn=f.data_realizacao
+      ?`<button class="btn-data-edit" onclick="openRenovarParticipante(${_tdAtual},${f.id},'${f.nome.replace(/'/g,"\\'")}','${f.data_realizacao}')"><i class="fa-solid fa-calendar-pen"></i> ${fmt(f.data_realizacao)}</button>`
+      :`<button class="btn-data-edit btn-data-empty" onclick="openRenovarParticipante(${_tdAtual},${f.id},'${f.nome.replace(/'/g,"\\'")}',null)"><i class="fa-solid fa-calendar-plus"></i> Registrar data</button>`;
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${dataBtn}</td></tr>`;
   }).join('');
 }
 function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
@@ -904,7 +986,7 @@ async function renderF(search=''){
   const sc={Ativo:'b-ok',Afastado:'b-alert',Desligado:'b-exp'};
   if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td style="color:var(--t2)">${r.cargo||'—'}</td><td style="color:var(--t2)">${r.setor||'—'}</td><td style="color:var(--t2)">${fmt(r.adm)}</td><td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td><button class="ab" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td style="color:var(--t2)">${r.cargo||'—'}</td><td style="color:var(--t2)">${r.setor||'—'}</td><td style="color:var(--t2)">${fmt(r.adm)}</td><td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="editF(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
 }
 function editF(id){
   const f=_cachedF.find(r=>r.id===id); if(!f)return;
@@ -972,6 +1054,26 @@ async function delAc(id){if(!confirm('Remover?'))return;await API.del('acidentes
 function noSelect(on){const v=on?'none':'';document.body.style.userSelect=v;document.body.style.webkitUserSelect=v;document.body.style.cursor=on?'col-resize':'';if(on)window.getSelection()?.removeAllRanges();}
 (function(){const sb=document.getElementById('sidebar'),h=document.getElementById('sb-resize');let a=false,sx,sw;h.addEventListener('mousedown',e=>{a=true;sx=e.clientX;sw=sb.offsetWidth;h.classList.add('dragging');noSelect(true);e.preventDefault();});document.addEventListener('mousemove',e=>{if(!a)return;sb.style.width=Math.min(340,Math.max(180,sw+(e.clientX-sx)))+'px';});document.addEventListener('mouseup',()=>{if(!a)return;a=false;h.classList.remove('dragging');noSelect(false);localStorage.setItem('sst_sb_w',sb.style.width);});const saved=localStorage.getItem('sst_sb_w');if(saved)sb.style.width=saved;})();
 (function(){document.querySelectorAll('.split-handle').forEach(h=>{const side=h.nextElementSibling,key='sst_split_'+(h.dataset.split||'');let a=false,sx,sw;h.addEventListener('mousedown',e=>{a=true;sx=e.clientX;sw=side.offsetWidth;h.classList.add('dragging');noSelect(true);e.preventDefault();});document.addEventListener('mousemove',e=>{if(!a)return;side.style.width=Math.min(420,Math.max(160,sw-(e.clientX-sx)))+'px';side.style.flexShrink='0';});document.addEventListener('mouseup',()=>{if(!a)return;a=false;h.classList.remove('dragging');noSelect(false);localStorage.setItem(key,side.style.width);});const saved=localStorage.getItem(key);if(saved){side.style.width=saved;side.style.flexShrink='0';}});})();
+
+// ── MOBILE SIDEBAR ──
+function toggleSidebar() {
+  const sb=document.getElementById('sidebar'),ov=document.getElementById('sb-overlay');
+  sb.classList.toggle('sb-open'); ov.classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('sb-open');
+  document.getElementById('sb-overlay').classList.remove('open');
+}
+document.getElementById('sb-close').onclick=closeSidebar;
+document.getElementById('sb-overlay').onclick=closeSidebar;
+document.querySelectorAll('.topbar').forEach(tb=>{
+  const btn=document.createElement('button');
+  btn.className='sb-toggle'; btn.innerHTML='<i class="fa-solid fa-bars"></i>';
+  btn.onclick=toggleSidebar; tb.insertBefore(btn,tb.firstChild);
+});
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{ if(window.innerWidth<=900)closeSidebar(); });
+});
 
 renderInicio();
 </script>
