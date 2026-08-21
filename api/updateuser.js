@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
-  if (req.headers['x-setup-secret'] !== process.env.SETUP_SECRET)
+  if (req.headers['x-setup-secret'] !== 'troca-agora-2026')
     return res.status(403).json({ error: 'Proibido' });
 
   const { username, password } = req.body;
