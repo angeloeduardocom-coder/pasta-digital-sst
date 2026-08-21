@@ -232,6 +232,25 @@
     ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:10px; }
     ::-webkit-scrollbar-thumb:hover { background:#94A3B8; }
 
+    /* DOCUMENTOS */
+    .doc-upload-area{border:2px dashed var(--border);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFBFD;margin-bottom:14px;}
+    .doc-upload-area:hover{border-color:var(--primary);background:var(--primary-l);}
+    .doc-upload-area i{font-size:28px;color:var(--t3);display:block;margin-bottom:8px;}
+    .doc-upload-area p{font-size:13.5px;font-weight:600;color:var(--t2);margin-bottom:4px;}
+    .doc-upload-area span{font-size:11.5px;color:var(--t3);}
+    .doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+    .doc-item:last-child{border-bottom:none;}
+    .doc-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
+    .doc-icon-box{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .doc-icon-box.pdf{background:#FEE2E2;color:#DC2626;}
+    .doc-icon-box.img{background:var(--primary-l);color:var(--primary);}
+    .doc-icon-box.gen{background:#F1F5F9;color:#475569;}
+    .doc-info{flex:1;min-width:0;}
+    .doc-name{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .doc-size{font-size:11.5px;color:var(--t3);margin-top:2px;}
+    .doc-empty{text-align:center;padding:32px;color:var(--t3);font-size:13.5px;}
+    .doc-uploading{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--primary-l);border-radius:9px;font-size:13px;color:var(--primary);margin-bottom:12px;}
+
     /* RESPONSIVE */
     .sb-toggle { display:none; align-items:center; justify-content:center; background:none; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; color:var(--t2); font-size:15px; flex-shrink:0; padding:0 10px; height:36px; transition:background .15s; }
     .sb-toggle:hover { background:#F1F5F9; }
@@ -644,6 +663,24 @@
   </div>
 </div>
 
+<div class="overlay" id="modal-documentos">
+  <div class="modal" style="width:540px">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-folder-open"></i></div> <span id="doc-func-nome">Documentos</span></div>
+    <input type="hidden" id="doc-func-id"/>
+    <div id="doc-uploading" class="doc-uploading" style="display:none"><i class="fa-solid fa-spinner fa-spin"></i> Enviando arquivo...</div>
+    <div class="doc-upload-area" onclick="document.getElementById('doc-file-input').click()">
+      <i class="fa-solid fa-cloud-arrow-up"></i>
+      <p>Clique para anexar documento</p>
+      <span>Fotos, PDF, Word, Excel — máx. 10 MB</span>
+    </div>
+    <input type="file" id="doc-file-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none" onchange="uploadDoc(this)"/>
+    <div id="doc-list"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('documentos')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // ── AUTH ──
@@ -1044,7 +1081,7 @@ async function renderF(search=''){
   const sc={Ativo:'b-ok',Afastado:'b-alert',Desligado:'b-exp'};
   if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td style="color:var(--t2)">${r.cargo||'—'}</td><td style="color:var(--t2)">${r.setor||'—'}</td><td style="color:var(--t2)">${fmt(r.adm)}</td><td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="editF(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td style="color:var(--t2)">${r.cargo||'—'}</td><td style="color:var(--t2)">${r.setor||'—'}</td><td style="color:var(--t2)">${fmt(r.adm)}</td><td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Documentos" onclick="openDocs(${r.id},'${r.nome.replace(/'/g,"\\'").replace(/"/g,'\\"')}')"><i class="fa-solid fa-folder-open"></i></button><button class="ab ab-edit" title="Editar" onclick="editF(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
 }
 function editF(id){
   const f=_cachedF.find(r=>r.id===id); if(!f)return;
@@ -1132,6 +1169,52 @@ document.querySelectorAll('.topbar').forEach(tb=>{
 document.querySelectorAll('.nav-item').forEach(item=>{
   item.addEventListener('click',()=>{ if(window.innerWidth<=900)closeSidebar(); });
 });
+
+// ── DOCUMENTOS ──
+async function openDocs(fid, nome) {
+  document.getElementById('doc-func-id').value=fid;
+  document.getElementById('doc-func-nome').textContent=nome;
+  document.getElementById('doc-file-input').value='';
+  document.getElementById('doc-uploading').style.display='none';
+  document.getElementById('modal-documentos').classList.add('open');
+  await renderDocs();
+}
+async function renderDocs() {
+  const fid=document.getElementById('doc-func-id').value;
+  const list=document.getElementById('doc-list');
+  list.innerHTML='<div class="doc-empty"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>';
+  const docs=await API.get('documentos?funcionario_id='+fid);
+  if(!docs||!docs.length){list.innerHTML='<div class="doc-empty">Nenhum documento anexado ainda.</div>';return;}
+  list.innerHTML=docs.map(d=>{
+    const isImg=d.tipo&&d.tipo.startsWith('image/');
+    const isPdf=d.tipo==='application/pdf';
+    const icon=isImg
+      ?`<img class="doc-thumb" src="${d.url}" alt="${d.nome}"/>`
+      :`<div class="doc-icon-box ${isPdf?'pdf':'gen'}"><i class="fa-solid fa-file-${isPdf?'pdf':'lines'}"></i></div>`;
+    const sz=d.tamanho?(d.tamanho<1048576?(d.tamanho/1024).toFixed(1)+' KB':(d.tamanho/1048576).toFixed(1)+' MB'):'';
+    return`<div class="doc-item"><a href="${d.url}" target="_blank" style="flex-shrink:0">${icon}</a><div class="doc-info"><div class="doc-name">${d.nome}</div><div class="doc-size">${sz}</div></div><a href="${d.url}" target="_blank" class="ab ab-edit" title="Abrir"><i class="fa-solid fa-arrow-up-right-from-square"></i></a><button class="ab" title="Excluir" onclick="delDoc(${d.id})"><i class="fa-solid fa-trash-can"></i></button></div>`;
+  }).join('');
+}
+async function uploadDoc(input) {
+  const file=input.files[0]; if(!file)return;
+  if(file.size>10*1024*1024){alert('Arquivo muito grande. Máximo 10 MB.');input.value='';return;}
+  const fid=document.getElementById('doc-func-id').value;
+  const prog=document.getElementById('doc-uploading');
+  prog.style.display='flex';
+  try{
+    const form=new FormData(); form.append('file',file);
+    const r=await fetch('/api/documentos?funcionario_id='+fid,{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('sst_token')},body:form});
+    if(!r.ok){const e=await r.json();throw new Error(e.error||'Erro ao enviar');}
+    input.value='';
+    await renderDocs();
+  }catch(e){alert(e.message);}
+  prog.style.display='none';
+}
+async function delDoc(id){
+  if(!confirm('Remover este documento?'))return;
+  await API.del('documentos',id);
+  await renderDocs();
+}
 
 renderInicio();
 </script>
