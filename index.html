@@ -11,12 +11,12 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     :root {
-      --primary:     #4F46E5;
-      --primary-d:   #4338CA;
-      --primary-l:   #EEF2FF;
+      --primary:     #16A34A;
+      --primary-d:   #15803D;
+      --primary-l:   #DCFCE7;
       --sb-bg:       #0F172A;
-      --sb-hover:    rgba(255,255,255,.05);
-      --sb-active:   rgba(99,102,241,.15);
+      --sb-hover:    rgba(22,163,74,.15);
+      --sb-active:   rgba(22,163,74,.2);
       --sb-border:   rgba(255,255,255,.06);
       --bg:          #F1F5F9;
       --surface:     #FFFFFF;
@@ -126,7 +126,7 @@
 
     .nav-item.active {
       background: var(--sb-active);
-      color: #A5B4FC;
+      color: #86EFAC;
     }
 
     .nav-item.active::before {
@@ -137,7 +137,7 @@
       transform: translateY(-50%);
       width: 3px;
       height: 20px;
-      background: linear-gradient(180deg, #818CF8, var(--primary));
+      background: linear-gradient(180deg, #4ADE80, var(--primary));
       border-radius: 0 3px 3px 0;
     }
 
@@ -789,7 +789,7 @@
       align-items: center;
       justify-content: center;
       font-size: 16px;
-      box-shadow: 0 2px 10px rgba(79,70,229,.4);
+      box-shadow: 0 2px 10px rgba(22,163,74,.4);
       transition: background .2s;
     }
     .sb-overlay {
@@ -870,9 +870,9 @@
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-resize" id="sb-resize"></div>
-  <div class="sb-logo">
-    <div class="sb-icon"><i class="fa-solid fa-shield-halved"></i></div>
-    <div class="sb-brand">
+  <div class="sb-logo" style="flex-direction:column; align-items:center; padding:20px 16px 16px; gap:10px;">
+    <img src="https://supersipat.com.br/wp-content/uploads/2026/02/Logo-seguranca-do-trabalho-1024x683.webp" alt="Logo SST" style="width:160px; height:auto; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.3);"/>
+    <div class="sb-brand" style="text-align:center;">
       <div class="name">Gestão SST</div>
       <div class="tagline">Saúde e Segurança do Trabalho</div>
     </div>
