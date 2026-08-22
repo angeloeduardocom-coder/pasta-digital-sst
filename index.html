@@ -2255,6 +2255,21 @@ function noSelect(on) {
   });
 })();
 
+// ── ANIMAÇÃO CONTÍNUA NOS GRÁFICOS ──
+let _rotDeg = 0, _lastFrame = 0;
+(function animateDonuts(ts) {
+  requestAnimationFrame(animateDonuts);
+  if (ts - _lastFrame < 33) return; // ~30fps
+  _lastFrame = ts;
+  _rotDeg = (_rotDeg + 0.4) % 360;
+  Object.values(charts).forEach(c => {
+    if (c && c.config.type === 'doughnut') {
+      c.options.rotation = (_rotDeg * Math.PI) / 180;
+      c.update('none');
+    }
+  });
+})();
+
 // ── RESPONSIVIDADE MOBILE ──
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
