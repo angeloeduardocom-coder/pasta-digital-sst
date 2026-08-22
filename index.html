@@ -2010,9 +2010,9 @@ function renderDetailEmps(list) {
         <td style="color:var(--t2)">${fmt(f.adm)}</td>
         <td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td>
         <td onclick="event.stopPropagation()">
-          <button class="btn-anx" onclick="openAnexos(${f.id},'${nomeEsc}')">
+          <button class="btn-anx" data-fid="${f.id}" data-fname="${f.nome.replace(/"/g,'&quot;')}" onclick="event.stopPropagation();openAnexosByBtn(this)">
             <i class="fa-solid fa-paperclip"></i>
-            ${cnt > 0 ? `<span class="anx-cnt">${cnt}</span>` : 'Anexar'}
+            ${cnt > 0 ? '<span class="anx-cnt">'+cnt+'</span>' : 'Anexar'}
           </button>
         </td>
       </tr>`;
@@ -2023,11 +2023,15 @@ function renderDetailEmps(list) {
 // ── ANEXOS ──
 let _anxFuncId = null;
 
+function openAnexosByBtn(btn) {
+  openAnexos(parseInt(btn.dataset.fid), btn.dataset.fname);
+}
+
 function openAnexos(funcId, funcNome) {
   _anxFuncId = funcId;
-  document.getElementById('anx-modal-title').textContent = `Anexos — ${funcNome}`;
+  document.getElementById('anx-modal-title').textContent = 'Anexos — ' + funcNome;
   renderAnexos();
-  openModal('anexos');
+  document.getElementById('modal-anexos').classList.add('open');
 }
 
 function anxKey() { return `sst_anx_${_tdCurrentId}_${_anxFuncId}`; }
