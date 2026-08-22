@@ -768,6 +768,47 @@
     .detail-empty i { font-size:48px; opacity:.25; display:block; margin-bottom:16px; }
     .detail-empty p { font-size:15px; line-height:1.7; }
 
+    /* ══════════════════ ANEXOS ══════════════════ */
+    .btn-anx {
+      background: var(--primary-l); color: var(--primary);
+      border: 1.5px solid var(--primary); border-radius: 7px;
+      padding: 5px 10px; font-size: 12px; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      transition: all .15s; white-space: nowrap;
+    }
+    .btn-anx:hover { background: var(--primary); color: #fff; }
+    .anx-cnt {
+      background: var(--primary); color: #fff;
+      border-radius: 10px; padding: 1px 6px; font-size: 10px;
+      font-weight: 700; min-width: 18px; text-align: center;
+    }
+    .btn-anx:hover .anx-cnt { background: #fff; color: var(--primary); }
+    .anx-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border: 1px solid var(--border);
+      border-radius: 9px; margin-bottom: 8px; background: #FAFBFD;
+    }
+    .anx-item > i { font-size: 22px; color: var(--primary); flex-shrink: 0; }
+    .anx-info { flex: 1; min-width: 0; }
+    .anx-nome { font-size: 13.5px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .anx-meta { font-size: 11.5px; color: var(--t3); margin-top: 2px; }
+    .anx-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .btn-anx-action {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 8px; cursor: pointer; font-size: 12px; color: var(--t2);
+      text-decoration: none; display: inline-flex; align-items: center;
+      transition: all .15s;
+    }
+    .btn-anx-action:hover { background: var(--primary-l); color: var(--primary); border-color: var(--primary); }
+    .btn-anx-del:hover { background: #FEE2E2 !important; color: #DC2626 !important; border-color: #FECACA !important; }
+    .btn-upload {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 12px; border: 2px dashed var(--border);
+      border-radius: 10px; color: var(--t3); font-size: 13.5px; font-weight: 600;
+      cursor: pointer; margin-top: 8px; transition: all .2s;
+    }
+    .btn-upload:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-l); }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
@@ -1252,6 +1293,7 @@
               <th>Setor</th>
               <th>Admissão</th>
               <th>Status</th>
+              <th>Anexos</th>
             </tr>
           </thead>
           <tbody id="td-page-tbody"></tbody>
@@ -1268,6 +1310,20 @@
 </div><!-- /main -->
 
 <!-- ══ MODAIS ══ -->
+<div class="overlay" id="modal-anexos">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-paperclip"></i></div> <span id="anx-modal-title">Anexos</span></div>
+    <div id="anx-list" style="max-height:340px;overflow-y:auto;"></div>
+    <label class="btn-upload">
+      <i class="fa-solid fa-cloud-arrow-up"></i> Adicionar Arquivo (PDF, foto, documento...)
+      <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" onchange="uploadAnexo(event)" style="display:none"/>
+    </label>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('anexos')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="modal-treinamento">
   <div class="modal">
     <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> Novo Treinamento</div>
@@ -1884,8 +1940,10 @@ function delT(id) {
 }
 
 let _tdEmps = [];
+let _tdCurrentId = null;
 
 function openTrainingDetail(id) {
+  _tdCurrentId = id;
   const r = DB.get(K.T).find(t => t.id === id);
   if (!r) return;
   const F = DB.get(K.F);
@@ -1941,16 +1999,98 @@ function renderDetailEmps(list) {
     empty.style.display = 'block';
   } else {
     empty.style.display = 'none';
-    tbody.innerHTML = list.map((f,i) => `<tr class="emp-row" onclick="editF(${f.id})" title="Clique para editar">
-      <td><div class="rn">${String(i+1).padStart(2,'0')}</div></td>
-      <td><strong style="font-weight:600">${f.nome}</strong></td>
-      <td style="color:var(--t2)">${f.cargo||'—'}</td>
-      <td style="color:var(--t2)">${f.setor||'—'}</td>
-      <td style="color:var(--t2)">${fmt(f.adm)}</td>
-      <td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td>
-      <td style="color:var(--t3);font-size:12px"><i class="fa-solid fa-pen-to-square"></i></td>
-    </tr>`).join('');
+    tbody.innerHTML = list.map((f,i) => {
+      const cnt = (DB.get(`sst_anx_${_tdCurrentId}_${f.id}`)||[]).length;
+      const nomeEsc = f.nome.replace(/'/g,"\\'");
+      return `<tr class="emp-row" onclick="editF(${f.id})" title="Clique para editar">
+        <td><div class="rn">${String(i+1).padStart(2,'0')}</div></td>
+        <td><strong style="font-weight:600">${f.nome}</strong></td>
+        <td style="color:var(--t2)">${f.cargo||'—'}</td>
+        <td style="color:var(--t2)">${f.setor||'—'}</td>
+        <td style="color:var(--t2)">${fmt(f.adm)}</td>
+        <td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td>
+        <td onclick="event.stopPropagation()">
+          <button class="btn-anx" onclick="openAnexos(${f.id},'${nomeEsc}')">
+            <i class="fa-solid fa-paperclip"></i>
+            ${cnt > 0 ? `<span class="anx-cnt">${cnt}</span>` : 'Anexar'}
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
   }
+}
+
+// ── ANEXOS ──
+let _anxFuncId = null;
+
+function openAnexos(funcId, funcNome) {
+  _anxFuncId = funcId;
+  document.getElementById('anx-modal-title').textContent = `Anexos — ${funcNome}`;
+  renderAnexos();
+  openModal('anexos');
+}
+
+function anxKey() { return `sst_anx_${_tdCurrentId}_${_anxFuncId}`; }
+
+function renderAnexos() {
+  const list = DB.get(anxKey());
+  const el = document.getElementById('anx-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="td-empty" style="padding:20px 0">Nenhum arquivo anexado ainda.</div>';
+    return;
+  }
+  el.innerHTML = list.map((a, i) => `
+    <div class="anx-item">
+      <i class="fa-solid ${anxIcon(a.tipo)}"></i>
+      <div class="anx-info">
+        <div class="anx-nome">${a.nome}</div>
+        <div class="anx-meta">${a.data} · ${anxSize(a.size)}</div>
+      </div>
+      <div class="anx-actions">
+        <a href="${a.base64}" download="${a.nome}" class="btn-anx-action" title="Baixar"><i class="fa-solid fa-download"></i></a>
+        <button class="btn-anx-action btn-anx-del" onclick="deleteAnexo(${i})" title="Remover"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function uploadAnexo(event) {
+  Array.from(event.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const list = DB.get(anxKey());
+      list.push({ nome: file.name, tipo: file.type, data: new Date().toLocaleDateString('pt-BR'), size: file.size, base64: e.target.result });
+      DB.set(anxKey(), list);
+      renderAnexos();
+      renderDetailEmps(_tdEmps);
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+
+function deleteAnexo(i) {
+  if (!confirm('Remover este arquivo?')) return;
+  const list = DB.get(anxKey());
+  list.splice(i, 1);
+  DB.set(anxKey(), list);
+  renderAnexos();
+  renderDetailEmps(_tdEmps);
+}
+
+function anxIcon(tipo) {
+  if (!tipo) return 'fa-file';
+  if (tipo.includes('pdf')) return 'fa-file-pdf';
+  if (tipo.includes('image')) return 'fa-file-image';
+  if (tipo.includes('word') || tipo.includes('document')) return 'fa-file-word';
+  if (tipo.includes('sheet') || tipo.includes('excel')) return 'fa-file-excel';
+  return 'fa-file';
+}
+
+function anxSize(b) {
+  if (!b) return '';
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
 }
 
 function filterDetailEmps(search) {
