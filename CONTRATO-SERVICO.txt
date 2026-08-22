@@ -1,0 +1,132 @@
+CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE DESENVOLVIMENTO DE SOFTWARE
+
+Lagoa Grande - PE, 21 de agosto de 2026.
+
+PARTES:
+
+CONTRATADO:
+Nome: Angelo Eduardo
+CPF: 123.463.134-24
+Cidade: Lagoa Grande - PE
+
+CONTRATANTE:
+Nome: Pedro Lucas
+CPF: ___________________________
+Cidade: Lagoa Grande - PE
+
+As partes acima identificadas têm entre si justo e acordado o presente Contrato de
+Prestação de Serviços, que se regerá pelas cláusulas e condições a seguir:
+
+
+CLÁUSULA 1 - DO OBJETO
+
+O presente contrato tem por objeto a prestação de serviços de desenvolvimento de
+sistema web de Gestão em Segurança e Saúde do Trabalho (SST), denominado
+"Pasta Digital SST", hospedado na nuvem e acessível pelo endereço:
+
+   https://pasta-digital-sst.vercel.app
+
+O sistema contempla os seguintes módulos:
+  - Cadastro e gestão de funcionários
+  - Controle de treinamentos e participantes
+  - Controle de extintores
+  - Registro de inspeções
+  - Registro de acidentes de trabalho
+  - Anexo de documentos por funcionário (fotos, PDFs e outros)
+  - Dashboard com indicadores e gráficos
+  - Visual personalizado com identidade da empresa
+
+
+CLÁUSULA 2 - DO VALOR E FORMA DE PAGAMENTO
+
+2.1 Pelo desenvolvimento do sistema descrito na Cláusula 1, o CONTRATANTE pagará
+ao CONTRATADO o valor de R$ 2.000,00 (dois mil reais), a ser pago em:
+
+   ( ) À vista
+   ( ) Parcelado: _______ parcelas de R$ ________
+
+2.2 O pagamento será realizado via:
+
+   ( ) PIX - Chave: ___________________________
+   ( ) Transferência bancária
+   ( ) Outro: ________________________________
+
+
+CLÁUSULA 3 - DA MANUTENÇÃO MENSAL
+
+3.1 Após a entrega do sistema, o CONTRATANTE pagará ao CONTRATADO o valor de
+R$ 150,00 (cento e cinquenta reais) mensais, referente à manutenção, suporte
+técnico e garantia de funcionamento do sistema.
+
+3.2 O pagamento da mensalidade deverá ser realizado até o dia ___ de cada mês.
+
+3.3 Em caso de atraso superior a 30 (trinta) dias no pagamento da mensalidade,
+o CONTRATADO poderá suspender o acesso ao sistema até a regularização.
+
+
+CLÁUSULA 4 - DAS OBRIGAÇÕES DO CONTRATADO
+
+4.1 Manter o sistema no ar e funcionando durante a vigência do contrato.
+4.2 Realizar correções de eventuais erros de funcionamento sem custo adicional.
+4.3 Prestar suporte técnico básico via WhatsApp ou telefone em dias úteis.
+
+
+CLÁUSULA 5 - DAS OBRIGAÇÕES DO CONTRATANTE
+
+5.1 Realizar os pagamentos nos prazos acordados.
+5.2 Utilizar o sistema de forma adequada e responsável.
+5.3 Não compartilhar as credenciais de acesso com terceiros não autorizados.
+5.4 Comunicar ao CONTRATADO qualquer problema ou necessidade de ajuste.
+
+
+CLÁUSULA 6 - DA PROPRIEDADE DO SISTEMA
+
+6.1 O sistema permanece de propriedade intelectual do CONTRATADO até a quitação
+total do valor de desenvolvimento (Cláusula 2).
+
+6.2 Após quitação total, os dados inseridos pelo CONTRATANTE são de sua
+exclusiva propriedade.
+
+
+CLÁUSULA 7 - DA VIGÊNCIA
+
+O presente contrato entra em vigor na data de sua assinatura, por prazo
+indeterminado, podendo ser rescindido por qualquer das partes mediante aviso
+prévio de 30 (trinta) dias.
+
+
+CLÁUSULA 8 - DO FORO
+
+Fica eleito o foro da comarca de Lagoa Grande - PE para dirimir quaisquer
+dúvidas ou litígios oriundos do presente contrato.
+
+
+Lagoa Grande - PE, _____ de __________________ de 2026.
+
+
+
+_____________________________________________
+CONTRATADO
+Angelo Eduardo
+CPF: 123.463.134-24
+
+
+
+_____________________________________________
+CONTRATANTE
+Pedro Lucas
+CPF: ___________________________
+
+
+
+_____________________________________________
+TESTEMUNHA 1
+Nome: ____________________________
+CPF:  ____________________________
+
+
+
+_____________________________________________
+TESTEMUNHA 2
+Nome: ____________________________
+CPF:  ____________________________
