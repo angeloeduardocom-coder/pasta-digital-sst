@@ -1460,6 +1460,16 @@
         <select id="f-stat"><option>Ativo</option><option>Afastado</option><option>Desligado</option></select>
       </div>
     </div>
+
+    <div class="field" id="f-anx-section" style="display:none">
+      <label>Documentos do Treinamento</label>
+      <div id="f-anx-list" style="max-height:200px;overflow-y:auto;margin-bottom:8px;"></div>
+      <label class="btn-upload">
+        <i class="fa-solid fa-cloud-arrow-up"></i> Anexar PDF, foto ou documento
+        <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" onchange="uploadAnexoF(event)" style="display:none"/>
+      </label>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('funcionario')">Cancelar</button>
       <button class="btn-save" onclick="saveF()">Salvar Registro</button>
@@ -2081,6 +2091,55 @@ function deleteAnexo(i) {
   renderDetailEmps(_tdEmps);
 }
 
+function renderAnexosF(funcId) {
+  const key = 'sst_anx_' + _tdCurrentId + '_' + funcId;
+  const list = DB.get(key);
+  const el = document.getElementById('f-anx-list');
+  if (!list.length) {
+    el.innerHTML = '<div style="font-size:12.5px;color:var(--t3);padding:8px 0">Nenhum arquivo ainda.</div>';
+    return;
+  }
+  el.innerHTML = list.map((a, i) => `
+    <div class="anx-item">
+      <i class="fa-solid ${anxIcon(a.tipo)}"></i>
+      <div class="anx-info">
+        <div class="anx-nome">${a.nome}</div>
+        <div class="anx-meta">${a.data} · ${anxSize(a.size)}</div>
+      </div>
+      <div class="anx-actions">
+        <a href="${a.base64}" download="${a.nome}" class="btn-anx-action" title="Baixar"><i class="fa-solid fa-download"></i></a>
+        <button class="btn-anx-action btn-anx-del" onclick="deleteAnexoF(${i},${funcId})" title="Remover"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function uploadAnexoF(event) {
+  const funcId = _anxFuncId;
+  const key = 'sst_anx_' + _tdCurrentId + '_' + funcId;
+  Array.from(event.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const list = DB.get(key);
+      list.push({ nome: file.name, tipo: file.type, data: new Date().toLocaleDateString('pt-BR'), size: file.size, base64: e.target.result });
+      DB.set(key, list);
+      renderAnexosF(funcId);
+      renderDetailEmps(_tdEmps);
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+
+function deleteAnexoF(i, funcId) {
+  if (!confirm('Remover este arquivo?')) return;
+  const key = 'sst_anx_' + _tdCurrentId + '_' + funcId;
+  const list = DB.get(key);
+  list.splice(i, 1);
+  DB.set(key, list);
+  renderAnexosF(funcId);
+  renderDetailEmps(_tdEmps);
+}
+
 function anxIcon(tipo) {
   if (!tipo) return 'fa-file';
   if (tipo.includes('pdf')) return 'fa-file-pdf';
@@ -2209,6 +2268,18 @@ function editF(id) {
   document.getElementById('f-setor').value = f.setor || '';
   document.getElementById('f-adm').value   = f.adm   || '';
   document.getElementById('f-stat').value  = f.status|| 'Ativo';
+
+  // Mostra seção de anexos quando aberto a partir do detalhe de treinamento
+  const fromTraining = document.getElementById('page-treinamento-detalhe').classList.contains('active');
+  const anxSection = document.getElementById('f-anx-section');
+  if (fromTraining && _tdCurrentId) {
+    _anxFuncId = f.id;
+    anxSection.style.display = 'block';
+    renderAnexosF(f.id);
+  } else {
+    anxSection.style.display = 'none';
+  }
+
   document.getElementById('modal-funcionario').classList.add('open');
 }
 
