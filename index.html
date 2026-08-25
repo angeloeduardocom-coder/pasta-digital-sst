@@ -1946,7 +1946,10 @@ function renderT(search='') {
       <td style="color:var(--t2)">${fmt(r.ult)}</td>
       <td style="color:var(--t2)">${fmt(r.prox)}</td>
       <td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td>
-      <td style="color:var(--t2)">${(r.funcs||[]).length || r.part || 0}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <span style="color:var(--t2)">${(r.funcs||[]).length || r.part || 0}</span>
+        <button onclick="event.stopPropagation();openAddParticipanteById(${r.id})" style="background:#EEF2FF;border:1px solid #C7D2FE;color:#4F46E5;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600">+ Add</button>
+      </div></td>
       <td><button class="ab" onclick="event.stopPropagation();delT(${r.id})" title="Remover"><i class="fa-solid fa-trash-can"></i></button></td>
     </tr>`).join('');
   }
@@ -2462,6 +2465,11 @@ function delAc(id) {
   renderAc();
 }
 
+function openAddParticipanteById(id) {
+  _tdCurrentId = id;
+  openAddParticipante();
+}
+
 function openAddParticipante() {
   const r = DB.get(K.T).find(t => t.id === _tdCurrentId);
   if (!r) return;
@@ -2501,7 +2509,9 @@ function confirmAddParticipante() {
   });
   DB.set(K.T, list);
   closeModal('add-participante');
-  openTrainingDetail(_tdCurrentId);
+  const detalheAtivo = document.getElementById('page-treinamento-detalhe').classList.contains('active');
+  if (detalheAtivo) openTrainingDetail(_tdCurrentId);
+  else renderT();
 }
 
 // deduplicar treinamentos com mesmo nome que foram criados antes do fix
