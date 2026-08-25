@@ -1272,16 +1272,22 @@
         <h2 id="td-page-nome">Treinamento</h2>
         <div class="sub" id="td-page-sub">Participantes do treinamento</div>
       </div>
-      <button class="btn-back" onclick="voltarTreinamentos()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="editT(_tdCurrentId)" style="font-size:13px;padding:6px 14px"><i class="fa-solid fa-pen"></i> Editar</button>
+        <button class="btn-back" onclick="voltarTreinamentos()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      </div>
     </div>
     <div class="page-body">
       <div class="detail-meta" id="td-page-meta"></div>
       <div class="tcard">
         <div class="tcard-toolbar">
           <h3>Colaboradores Participantes</h3>
-          <div class="search-box">
-            <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-            <input type="text" placeholder="Buscar colaborador..." oninput="filterDetailEmps(this.value)"/>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="search-box">
+              <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" placeholder="Buscar colaborador..." oninput="filterDetailEmps(this.value)"/>
+            </div>
+            <button class="btn-primary" onclick="openAddParticipante()" style="font-size:13px;padding:6px 14px;white-space:nowrap"><i class="fa-solid fa-user-plus"></i> Adicionar</button>
           </div>
         </div>
         <table id="td-page-table">
@@ -1326,7 +1332,8 @@
 
 <div class="overlay" id="modal-treinamento">
   <div class="modal">
-    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> Novo Treinamento</div>
+    <input type="hidden" id="t-edit-id"/>
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> <span id="t-modal-title">Novo Treinamento</span></div>
     <div class="field">
       <label>Treinamento</label>
       <select id="t-nome" onchange="document.getElementById('t-outro-w').style.display=this.value==='Outro'?'block':'none'">
@@ -1374,6 +1381,21 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('treinamento')">Cancelar</button>
       <button class="btn-save" onclick="saveT()">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-add-participante">
+  <div class="modal">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-user-plus"></i></div> Adicionar Funcionário</div>
+    <div class="field">
+      <label>Selecione o(s) funcionário(s)</label>
+      <div class="emp-picker" id="add-part-picker" style="max-height:300px;overflow-y:auto"></div>
+      <div class="emp-count" id="add-part-count">0 selecionados</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('add-participante')">Cancelar</button>
+      <button class="btn-save" onclick="confirmAddParticipante()">Adicionar</button>
     </div>
   </div>
 </div>
@@ -1843,6 +1865,17 @@ function openModal(tipo) {
 
   // seletor de funcionários no modal de treinamento
   if (tipo === 'treinamento') {
+    document.getElementById('t-edit-id').value = '';
+    document.getElementById('t-modal-title').textContent = 'Novo Treinamento';
+    document.getElementById('t-nome').value  = '';
+    document.getElementById('t-cat').value   = 'NR';
+    document.getElementById('t-per').value   = 'Anual';
+    document.getElementById('t-ult').value   = '';
+    document.getElementById('t-prox').value  = '';
+    document.getElementById('t-stat').value  = 'Concluído';
+    document.getElementById('t-ch').value    = '';
+    document.getElementById('t-outro').value = '';
+    document.getElementById('t-outro-w').style.display = 'none';
     const picker = document.getElementById('t-emp-picker');
     if (picker) {
       if (!fList.length) {
@@ -1936,11 +1969,47 @@ function saveT() {
   const ult  = document.getElementById('t-ult').value;
   if (!nome||!ult) { alert('Preencha o nome e a data de realização.'); return; }
   const funcs = [...document.querySelectorAll('#t-emp-picker input:checked')].map(cb => +cb.value);
-  const list = DB.get(K.T);
-  list.push({ id:Date.now(), nome, cat:document.getElementById('t-cat').value, per:document.getElementById('t-per').value, ult, prox:document.getElementById('t-prox').value, status:document.getElementById('t-stat').value, part:funcs.length, ch:document.getElementById('t-ch').value||0, funcs });
+  const editId = +document.getElementById('t-edit-id').value;
+  const entry = { nome, cat:document.getElementById('t-cat').value, per:document.getElementById('t-per').value, ult, prox:document.getElementById('t-prox').value, status:document.getElementById('t-stat').value, part:funcs.length, ch:document.getElementById('t-ch').value||0, funcs };
+  let list = DB.get(K.T);
+  if (editId) {
+    list = list.map(r => r.id === editId ? { ...r, ...entry } : r);
+  } else {
+    list.push({ id:Date.now(), ...entry });
+  }
   DB.set(K.T, list);
   closeModal('treinamento');
   renderT();
+  if (editId && _tdCurrentId === editId) openTrainingDetail(editId);
+}
+
+function editT(id) {
+  const r = DB.get(K.T).find(t => t.id === id);
+  if (!r) return;
+  document.getElementById('t-edit-id').value = id;
+  document.getElementById('t-modal-title').textContent = 'Editar Treinamento';
+  const sel = document.getElementById('t-nome');
+  const knownOpts = [...sel.options].map(o => o.value);
+  if (knownOpts.includes(r.nome)) {
+    sel.value = r.nome;
+    document.getElementById('t-outro-w').style.display = 'none';
+  } else {
+    sel.value = 'Outro';
+    document.getElementById('t-outro-w').style.display = 'block';
+    document.getElementById('t-outro').value = r.nome;
+  }
+  document.getElementById('t-cat').value  = r.cat  || 'NR';
+  document.getElementById('t-per').value  = r.per  || 'Anual';
+  document.getElementById('t-ult').value  = r.ult  || '';
+  document.getElementById('t-prox').value = r.prox || '';
+  document.getElementById('t-stat').value = r.status || 'Concluído';
+  document.getElementById('t-ch').value   = r.ch   || 0;
+  openModal('treinamento');
+  const fIds = r.funcs || [];
+  document.querySelectorAll('#t-emp-picker input').forEach(cb => {
+    cb.checked = fIds.includes(+cb.value);
+  });
+  updateEmpCount();
 }
 
 function delT(id) {
@@ -2392,6 +2461,60 @@ function delAc(id) {
   DB.set(K.AC, DB.get(K.AC).filter(r=>r.id!==id));
   renderAc();
 }
+
+function openAddParticipante() {
+  const r = DB.get(K.T).find(t => t.id === _tdCurrentId);
+  if (!r) return;
+  const jaIds = (r.funcs || []).map(Number);
+  const todos = DB.get(K.F);
+  const disponiveis = todos.filter(f => !jaIds.includes(f.id));
+  const picker = document.getElementById('add-part-picker');
+  if (!disponiveis.length) {
+    picker.innerHTML = '<div class="td-empty" style="padding:12px">Todos os funcionários já estão neste treinamento</div>';
+  } else {
+    picker.innerHTML = disponiveis.map(f => `
+      <label class="emp-check">
+        <input type="checkbox" value="${f.id}" onchange="updateAddPartCount()">
+        <div>
+          <div>${f.nome}</div>
+          <div class="ec-sub">${[f.cargo, f.setor].filter(Boolean).join(' · ')}</div>
+        </div>
+      </label>`).join('');
+  }
+  document.getElementById('add-part-count').textContent = '0 selecionados';
+  document.getElementById('modal-add-participante').classList.add('open');
+}
+
+function updateAddPartCount() {
+  const n = document.querySelectorAll('#add-part-picker input:checked').length;
+  document.getElementById('add-part-count').textContent = n + ' selecionado' + (n !== 1 ? 's' : '');
+}
+
+function confirmAddParticipante() {
+  const novos = [...document.querySelectorAll('#add-part-picker input:checked')].map(cb => +cb.value);
+  if (!novos.length) { alert('Selecione ao menos um funcionário.'); return; }
+  let list = DB.get(K.T);
+  list = list.map(r => {
+    if (r.id !== _tdCurrentId) return r;
+    const funcs = [...new Set([...(r.funcs || []).map(Number), ...novos])];
+    return { ...r, funcs, part: funcs.length };
+  });
+  DB.set(K.T, list);
+  closeModal('add-participante');
+  openTrainingDetail(_tdCurrentId);
+}
+
+// deduplicar treinamentos com mesmo nome que foram criados antes do fix
+(function deduplicateT() {
+  const list = DB.get(K.T);
+  const seen = {};
+  const clean = [];
+  list.forEach(r => {
+    const key = (r.nome||'').trim().toLowerCase();
+    if (!seen[key]) { seen[key] = true; clean.push(r); }
+  });
+  if (clean.length < list.length) DB.set(K.T, clean);
+})();
 
 renderInicio();
 
