@@ -519,7 +519,7 @@
             <button class="btn-primary" style="white-space:nowrap;height:36px;padding:0 14px;font-size:13px" onclick="openAddParticipante()"><i class="fa-solid fa-user-plus"></i> Adicionar</button>
           </div>
         </div>
-        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Realização do Treinamento</th></tr></thead>
+        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Última Realização</th><th>Próxima Realização</th></tr></thead>
         <tbody id="td-page-tbody"></tbody></table>
         <div id="td-page-empty" class="detail-empty" style="display:none">
           <i class="fa-solid fa-users"></i>
@@ -988,8 +988,7 @@ function openTrainingDetail(id){
   document.getElementById('td-page-sub').textContent=`${r.cat} · ${r.per} · ${_tdEmps.length} participante${_tdEmps.length!==1?'s':''}`;
   document.getElementById('td-page-meta').innerHTML=`
     <div class="detail-meta-card"><span class="dmc-label">Status</span><span style="margin-top:4px"><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></span></div>
-    <div class="detail-meta-card"><span class="dmc-label">Última Realização</span><input type="date" id="td-ult-input" class="dmc-date-input" value="${r.ult||''}" onchange="saveTreinamentoDates()"></div>
-    <div class="detail-meta-card"><span class="dmc-label">Próxima Realização</span><input type="date" id="td-prox-input" class="dmc-date-input" value="${r.prox||''}" onchange="saveTreinamentoDates()"></div>
+    <div class="detail-meta-card"><span class="dmc-label">Periodicidade</span><span class="dmc-val">${r.per||'—'}</span></div>
     <div class="detail-meta-card"><span class="dmc-label">Carga Horária</span><span class="dmc-val">${r.ch||0}h</span></div>
     <div class="detail-meta-card"><span class="dmc-label">Participantes</span><span class="dmc-val">${_tdEmps.length}</span></div>
     <div class="detail-meta-card"><span class="dmc-label">Categoria</span><span style="margin-top:4px"><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></span></div>`;
@@ -997,16 +996,12 @@ function openTrainingDetail(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-treinamento-detalhe').classList.add('active');
 }
-async function saveTreinamentoDates(){
-  const ult=document.getElementById('td-ult-input').value||null;
-  const prox=document.getElementById('td-prox-input').value||null;
-  const r=_cachedT.find(t=>t.id===_tdAtual); if(!r)return;
-  try{
-    const updated=await API.put('treinamentos',_tdAtual,{nome:r.nome,cat:r.cat,per:r.per,ch:r.ch||0,ult,prox});
-    const idx=_cachedT.findIndex(t=>t.id===_tdAtual);
-    if(idx>=0)_cachedT[idx]={..._cachedT[idx],...updated};
-    if(!prox&&ult&&updated.prox)document.getElementById('td-prox-input').value=updated.prox;
-  }catch(e){alert('Erro ao salvar datas: '+e.message);}
+function calcProxFront(ult, per){
+  if(!ult)return null;
+  const d=new Date(ult+'T00:00:00');
+  const map={'Mensal':1,'Trimestral':3,'Semestral':6,'Anual':12,'Bienal':24,'Quinquenal':60};
+  d.setMonth(d.getMonth()+(map[per]||12));
+  return d.toISOString().split('T')[0];
 }
 function renderDetailEmps(list){
   const tbody=document.getElementById('td-page-tbody'), empty=document.getElementById('td-page-empty');
@@ -1015,11 +1010,15 @@ function renderDetailEmps(list){
   if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   const tid=_cachedT.find(t=>(t.funcs||[]).some(p=>list[0]&&p.id===list[0].id))?.id||document.getElementById('td-page-nome').dataset.tid;
+  const trein=_cachedT.find(t=>t.id===_tdAtual);
+  const per=trein?.per||'Anual';
   tbody.innerHTML=list.map((f,i)=>{
-    const dataBtn=f.data_realizacao
+    const ultBtn=f.data_realizacao
       ?`<button class="btn-data-edit" onclick="openRenovarParticipante(${_tdAtual},${f.id},'${f.nome.replace(/'/g,"\\'")}','${f.data_realizacao}')"><i class="fa-solid fa-calendar-pen"></i> ${fmt(f.data_realizacao)}</button>`
       :`<button class="btn-data-edit btn-data-empty" onclick="openRenovarParticipante(${_tdAtual},${f.id},'${f.nome.replace(/'/g,"\\'")}',null)"><i class="fa-solid fa-calendar-plus"></i> Registrar data</button>`;
-    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${dataBtn}</td></tr>`;
+    const proxDate=calcProxFront(f.data_realizacao,per);
+    const proxTd=proxDate?`<span style="color:var(--t2);font-size:13px">${fmt(proxDate)}</span>`:`<span style="color:var(--t3);font-size:13px">—</span>`;
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td></tr>`;
   }).join('');
 }
 function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
