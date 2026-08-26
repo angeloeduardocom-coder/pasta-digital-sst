@@ -889,14 +889,6 @@ async function openModal(tipo) {
     document.getElementById('t-outro').value='';
     document.getElementById('t-cat').value='NR';
     document.getElementById('t-per').value='Anual';
-    document.getElementById('t-ult').value='';
-    document.getElementById('t-prox').value='';
-    document.getElementById('t-ch').value='';
-    const fList=_cachedF.length?_cachedF:await API.get('funcionarios');
-    _cachedF=fList;
-    const picker=document.getElementById('t-emp-picker');
-    picker.innerHTML=fList.length?fList.map(f=>`<label class="emp-check"><input type="checkbox" value="${f.id}" onchange="updateEmpCount()"><div><div>${f.nome}</div><div class="ec-sub">${[f.cargo,f.setor].filter(Boolean).join(' · ')}</div></div></label>`).join(''):'<div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div>';
-    updateEmpCount();
   }
   const fNames=_cachedF.map(f=>f.nome);
   const dlAc=document.getElementById('fl-ac');
