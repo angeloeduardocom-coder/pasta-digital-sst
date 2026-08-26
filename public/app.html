@@ -587,16 +587,6 @@
       <div class="field"><label>Categoria</label><select id="t-cat"><option value="NR">NR</option><option value="SST">SST</option><option value="Operacional">Operacional</option><option value="Emergência">Emergência</option></select></div>
       <div class="field"><label>Periodicidade</label><select id="t-per"><option>Anual</option><option>Bianual</option><option>Trianual</option><option>Quinquenal</option><option>Único</option></select></div>
     </div>
-    <div class="frow">
-      <div class="field"><label>Última Realização</label><input type="date" id="t-ult"/></div>
-      <div class="field"><label>Próxima Realização</label><input type="date" id="t-prox"/></div>
-    </div>
-    <div class="field"><label>Carga Horária (h)</label><input type="number" id="t-ch" min="0" placeholder="0"/></div>
-    <div class="field">
-      <label>Participantes</label>
-      <div class="emp-picker" id="t-emp-picker"><div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div></div>
-      <div class="emp-count" id="t-emp-count">0 selecionados</div>
-    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('treinamento')">Cancelar</button>
       <button class="btn-save" onclick="saveT()">Salvar Registro</button>
@@ -949,11 +939,9 @@ async function renderT(search='') {
 async function saveT(){
   const nv=document.getElementById('t-nome').value;
   const nome=nv==='Outro'?document.getElementById('t-outro').value.trim():nv;
-  const ult=document.getElementById('t-ult').value;
-  if(!nome||!ult){alert('Preencha o nome e a data de realização.');return;}
-  const funcs=[...document.querySelectorAll('#t-emp-picker input:checked')].map(cb=>+cb.value);
+  if(!nome){alert('Selecione o treinamento.');return;}
   const editId=document.getElementById('t-edit-id').value;
-  const data={nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value,ult,prox:document.getElementById('t-prox').value||null,ch:document.getElementById('t-ch').value||0,funcs};
+  const data={nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value};
   try{
     if(editId){await API.put('treinamentos',editId,data);}
     else{await API.post('treinamentos',data);}
@@ -963,7 +951,6 @@ async function saveT(){
 async function delT(id){if(!confirm('Remover este treinamento?'))return;await API.del('treinamentos',id);_cachedT=[];renderT();}
 async function editT(id){
   const r=_cachedT.find(t=>t.id===id); if(!r)return;
-  const fList=_cachedF.length?_cachedF:await API.get('funcionarios'); _cachedF=fList;
   document.getElementById('t-modal-title').textContent='Editar Treinamento';
   document.getElementById('t-edit-id').value=r.id;
   const nomeSel=document.getElementById('t-nome');
@@ -972,13 +959,6 @@ async function editT(id){
   else{nomeSel.value='Outro';document.getElementById('t-outro-w').style.display='block';document.getElementById('t-outro').value=r.nome;}
   document.getElementById('t-cat').value=r.cat||'NR';
   document.getElementById('t-per').value=r.per||'Anual';
-  document.getElementById('t-ult').value=r.ult?toISO(r.ult):'';
-  document.getElementById('t-prox').value=r.prox?toISO(r.prox):'';
-  document.getElementById('t-ch').value=r.ch||0;
-  const existing=(r.funcs||[]).map(f=>f.id);
-  const picker=document.getElementById('t-emp-picker');
-  picker.innerHTML=fList.length?fList.map(f=>`<label class="emp-check"><input type="checkbox" value="${f.id}" ${existing.includes(f.id)?'checked':''} onchange="updateEmpCount()"><div><div>${f.nome}</div><div class="ec-sub">${[f.cargo,f.setor].filter(Boolean).join(' · ')}</div></div></label>`).join(''):'<div class="td-empty" style="padding:12px">Nenhum funcionário cadastrado</div>';
-  updateEmpCount();
   document.getElementById('modal-treinamento').classList.add('open');
 }
 function openRenovarParticipante(tid,fid,nome,dataAtual){

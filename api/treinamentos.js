@@ -41,14 +41,14 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { nome, cat, per, ult, prox, status, ch, funcs } = req.body;
-      if (!nome || !ult) return res.status(400).json({ error: 'Nome e data obrigatórios' });
+      const { nome, cat, per, ult, prox, ch, funcs } = req.body;
+      if (!nome) return res.status(400).json({ error: 'Nome obrigatório' });
 
-      const proxFinal = prox || calcProx(ult, per || 'Anual');
+      const proxFinal = prox || (ult ? calcProx(ult, per || 'Anual') : null);
 
       const [t] = await sql`
         INSERT INTO treinamentos (nome, cat, per, ult, prox, status, ch)
-        VALUES (${nome}, ${cat||'NR'}, ${per||'Anual'}, ${ult}, ${proxFinal}, 'auto', ${ch||0})
+        VALUES (${nome}, ${cat||'NR'}, ${per||'Anual'}, ${ult||null}, ${proxFinal}, 'auto', ${ch||0})
         RETURNING *
       `;
 
