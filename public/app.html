@@ -588,6 +588,7 @@
       <div class="field"><label>Categoria</label><select id="t-cat"><option value="NR">NR</option><option value="SST">SST</option><option value="Operacional">Operacional</option><option value="Emergência">Emergência</option></select></div>
       <div class="field"><label>Periodicidade</label><select id="t-per"><option>Anual</option><option>Bianual</option><option>Trianual</option><option>Quinquenal</option><option>Único</option></select></div>
     </div>
+    <div class="field"><label>Carga Horária (horas)</label><input type="number" id="t-ch" min="0" placeholder="Ex: 8"/></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('treinamento')">Cancelar</button>
       <button class="btn-save" onclick="saveT()">Salvar Registro</button>
@@ -890,6 +891,7 @@ async function openModal(tipo) {
     document.getElementById('t-outro').value='';
     document.getElementById('t-cat').value='NR';
     document.getElementById('t-per').value='Anual';
+    document.getElementById('t-ch').value='';
   }
   const fNames=_cachedF.map(f=>f.nome);
   const dlAc=document.getElementById('fl-ac');
@@ -934,7 +936,7 @@ async function saveT(){
   const nome=nv==='Outro'?document.getElementById('t-outro').value.trim():nv;
   if(!nome){alert('Selecione o treinamento.');return;}
   const editId=document.getElementById('t-edit-id').value;
-  const data={nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value};
+  const data={nome,cat:document.getElementById('t-cat').value,per:document.getElementById('t-per').value,ch:Number(document.getElementById('t-ch').value)||0};
   try{
     if(editId){await API.put('treinamentos',editId,data);}
     else{await API.post('treinamentos',data);}
@@ -952,6 +954,7 @@ async function editT(id){
   else{nomeSel.value='Outro';document.getElementById('t-outro-w').style.display='block';document.getElementById('t-outro').value=r.nome;}
   document.getElementById('t-cat').value=r.cat||'NR';
   document.getElementById('t-per').value=r.per||'Anual';
+  document.getElementById('t-ch').value=r.ch||'';
   document.getElementById('modal-treinamento').classList.add('open');
 }
 function openRenovarParticipante(tid,fid,nome,dataAtual){
