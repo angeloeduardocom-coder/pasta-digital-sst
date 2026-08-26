@@ -513,7 +513,10 @@
       <div class="tcard">
         <div class="tcard-toolbar">
           <h3>Colaboradores Participantes</h3>
-          <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar colaborador..." oninput="filterDetailEmps(this.value)"/></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar colaborador..." oninput="filterDetailEmps(this.value)"/></div>
+            <button class="btn-primary" style="white-space:nowrap;height:36px;padding:0 14px;font-size:13px" onclick="openAddParticipante()"><i class="fa-solid fa-user-plus"></i> Adicionar</button>
+          </div>
         </div>
         <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Realização do Treinamento</th></tr></thead>
         <tbody id="td-page-tbody"></tbody></table>
@@ -542,6 +545,22 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('renovar')">Cancelar</button>
       <button class="btn-primary" onclick="saveRenovar()"><i class="fa-solid fa-check"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADICIONAR PARTICIPANTE -->
+<div class="overlay" id="modal-add-participante">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-user-plus"></i></div> Adicionar Colaboradores</div>
+    <div class="field" style="margin-bottom:8px">
+      <input type="text" id="add-part-search" placeholder="Buscar colaborador..." oninput="filterAddPart(this.value)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg2);color:var(--t1);outline:none"/>
+    </div>
+    <div id="add-part-picker" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px"></div>
+    <div style="margin-top:10px;font-size:12px;color:var(--t2)" id="add-part-cnt">0 selecionado(s)</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('add-participante')">Cancelar</button>
+      <button class="btn-primary" onclick="saveAddParticipantes()"><i class="fa-solid fa-check"></i> Adicionar</button>
     </div>
   </div>
 </div>
@@ -1025,6 +1044,46 @@ function voltarTreinamentos(){
   document.getElementById('page-treinamentos').classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelector('[onclick*="treinamentos"]').classList.add('active');
+}
+async function openAddParticipante(){
+  const jaVinculados=(_tdEmps||[]).map(f=>f.id);
+  let todos=[];
+  try{todos=await API.get('funcionarios');}catch(e){alert('Erro ao carregar funcionários.');return;}
+  const disponiveis=todos;
+  const picker=document.getElementById('add-part-picker');
+  function renderPicker(list){
+    picker.innerHTML=list.length?list.map(f=>`<label class="emp-check"><input type="checkbox" value="${f.id}" onchange="updateAddPartCnt()"><div><div>${f.nome}</div><div class="ec-sub">${[f.cargo,f.setor].filter(Boolean).join(' · ')}</div></div></label>`).join(''):'<div style="padding:12px;text-align:center;color:var(--t2);font-size:13px">Todos os colaboradores já participam deste treinamento.</div>';
+  }
+  renderPicker(disponiveis);
+  document.getElementById('add-part-search').value='';
+  document.getElementById('add-part-cnt').textContent='0 selecionado(s)';
+  picker._all=disponiveis;
+  document.getElementById('modal-add-participante').classList.add('open');
+}
+function filterAddPart(s){
+  const picker=document.getElementById('add-part-picker');
+  const list=(picker._all||[]).filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase()));
+  const checked=new Set([...picker.querySelectorAll('input:checked')].map(i=>+i.value));
+  picker.innerHTML=list.length?list.map(f=>`<label class="emp-check"><input type="checkbox" value="${f.id}" ${checked.has(f.id)?'checked':''} onchange="updateAddPartCnt()"><div><div>${f.nome}</div><div class="ec-sub">${[f.cargo,f.setor].filter(Boolean).join(' · ')}</div></div></label>`).join(''):'<div style="padding:12px;text-align:center;color:var(--t2);font-size:13px">Nenhum resultado.</div>';
+}
+function updateAddPartCnt(){
+  const n=document.querySelectorAll('#add-part-picker input:checked').length;
+  document.getElementById('add-part-cnt').textContent=`${n} selecionado${n!==1?'s':''}`;
+}
+async function saveAddParticipantes(){
+  const selecionados=[...document.querySelectorAll('#add-part-picker input:checked')].map(i=>+i.value);
+  if(!selecionados.length){alert('Selecione ao menos um colaborador.');return;}
+  try{
+    for(const fid of selecionados){
+      const r=await fetch('/api/participante',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('sst_token')},body:JSON.stringify({treinamento_id:_tdAtual,funcionario_id:fid})});
+      if(!r.ok){const e=await r.json();throw new Error(e.error);}
+    }
+    closeModal('add-participante');
+    _cachedT=[];
+    const all=await API.get('treinamentos');_cachedT=all;
+    const tr=all.find(t=>t.id===_tdAtual);
+    if(tr){_tdEmps=tr.funcs||[];renderDetailEmps(_tdEmps);document.getElementById('td-page-sub').textContent=`${tr.cat} · ${tr.per} · ${_tdEmps.length} participante${_tdEmps.length!==1?'s':''}`;}
+  }catch(e){alert('Erro: '+e.message);}
 }
 
 // ── EXTINTORES ──

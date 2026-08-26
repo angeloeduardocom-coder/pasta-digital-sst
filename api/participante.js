@@ -11,6 +11,19 @@ module.exports = async (req, res) => {
       ADD COLUMN IF NOT EXISTS data_realizacao DATE
     `;
 
+    if (req.method === 'POST') {
+      const { treinamento_id, funcionario_id } = req.body;
+      if (!treinamento_id || !funcionario_id) {
+        return res.status(400).json({ error: 'Dados incompletos' });
+      }
+      await sql`
+        INSERT INTO treinamento_participantes (treinamento_id, funcionario_id)
+        VALUES (${treinamento_id}, ${funcionario_id})
+        ON CONFLICT DO NOTHING
+      `;
+      return res.json({ ok: true });
+    }
+
     if (req.method === 'PUT') {
       const { treinamento_id, funcionario_id, data_realizacao } = req.body;
       if (!treinamento_id || !funcionario_id || !data_realizacao) {
