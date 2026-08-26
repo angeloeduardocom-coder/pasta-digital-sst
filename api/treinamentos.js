@@ -44,6 +44,9 @@ module.exports = async (req, res) => {
       const { nome, cat, per, ult, prox, ch, funcs } = req.body;
       if (!nome) return res.status(400).json({ error: 'Nome obrigatório' });
 
+      const [existing] = await sql`SELECT id FROM treinamentos WHERE LOWER(nome) = LOWER(${nome}) LIMIT 1`;
+      if (existing) return res.status(409).json({ error: `Treinamento "${nome}" já existe na lista.` });
+
       const proxFinal = prox || (ult ? calcProx(ult, per || 'Anual') : null);
 
       const [t] = await sql`
