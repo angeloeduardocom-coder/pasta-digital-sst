@@ -212,6 +212,7 @@
     .detail-meta { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
     .detail-meta-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 20px; display:flex; flex-direction:column; gap:3px; min-width:130px; }
     .dmc-label { font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; }
+    .dmc-date-input { border:none; background:transparent; font-size:14px; font-weight:600; color:var(--t1); padding:0; margin-top:4px; outline:none; cursor:pointer; width:100%; }
     .dmc-val { font-size:17px; font-weight:800; color:var(--t1); letter-spacing:-.4px; }
     .emp-row { cursor:pointer; transition:background .12s; }
     .emp-row:hover { background:#F0F4FF !important; }
@@ -987,14 +988,25 @@ function openTrainingDetail(id){
   document.getElementById('td-page-sub').textContent=`${r.cat} · ${r.per} · ${_tdEmps.length} participante${_tdEmps.length!==1?'s':''}`;
   document.getElementById('td-page-meta').innerHTML=`
     <div class="detail-meta-card"><span class="dmc-label">Status</span><span style="margin-top:4px"><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></span></div>
-    <div class="detail-meta-card"><span class="dmc-label">Última Realização</span><span class="dmc-val">${fmt(r.ult)}</span></div>
-    <div class="detail-meta-card"><span class="dmc-label">Próxima Realização</span><span class="dmc-val">${fmt(r.prox)||'—'}</span></div>
+    <div class="detail-meta-card"><span class="dmc-label">Última Realização</span><input type="date" id="td-ult-input" class="dmc-date-input" value="${r.ult||''}" onchange="saveTreinamentoDates()"></div>
+    <div class="detail-meta-card"><span class="dmc-label">Próxima Realização</span><input type="date" id="td-prox-input" class="dmc-date-input" value="${r.prox||''}" onchange="saveTreinamentoDates()"></div>
     <div class="detail-meta-card"><span class="dmc-label">Carga Horária</span><span class="dmc-val">${r.ch||0}h</span></div>
     <div class="detail-meta-card"><span class="dmc-label">Participantes</span><span class="dmc-val">${_tdEmps.length}</span></div>
     <div class="detail-meta-card"><span class="dmc-label">Categoria</span><span style="margin-top:4px"><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></span></div>`;
   renderDetailEmps(_tdEmps);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-treinamento-detalhe').classList.add('active');
+}
+async function saveTreinamentoDates(){
+  const ult=document.getElementById('td-ult-input').value||null;
+  const prox=document.getElementById('td-prox-input').value||null;
+  const r=_cachedT.find(t=>t.id===_tdAtual); if(!r)return;
+  try{
+    const updated=await API.put('treinamentos',_tdAtual,{nome:r.nome,cat:r.cat,per:r.per,ch:r.ch||0,ult,prox});
+    const idx=_cachedT.findIndex(t=>t.id===_tdAtual);
+    if(idx>=0)_cachedT[idx]={..._cachedT[idx],...updated};
+    if(!prox&&ult&&updated.prox)document.getElementById('td-prox-input').value=updated.prox;
+  }catch(e){alert('Erro ao salvar datas: '+e.message);}
 }
 function renderDetailEmps(list){
   const tbody=document.getElementById('td-page-tbody'), empty=document.getElementById('td-page-empty');

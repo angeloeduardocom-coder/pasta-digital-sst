@@ -83,14 +83,14 @@ module.exports = async (req, res) => {
     if (req.method === 'PUT') {
       const { id } = req.query;
       const { nome, cat, per, ult, prox, ch, funcs } = req.body;
-      if (!id || !ult) return res.status(400).json({ error: 'ID e data obrigatórios' });
+      if (!id) return res.status(400).json({ error: 'ID obrigatório' });
 
-      const proxFinal = prox || calcProx(ult, per || 'Anual');
+      const proxFinal = prox || (ult ? calcProx(ult, per || 'Anual') : null);
 
       await sql`
         UPDATE treinamentos
         SET nome=COALESCE(${nome||null}, nome), cat=COALESCE(${cat||null}, cat),
-            per=${per||'Anual'}, ult=${ult}, prox=${proxFinal}, ch=${ch||0}
+            per=${per||'Anual'}, ult=${ult||null}, prox=${proxFinal}, ch=${ch||0}
         WHERE id=${id}
       `;
 
