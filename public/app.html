@@ -519,7 +519,7 @@
             <button class="btn-primary" style="white-space:nowrap;height:36px;padding:0 14px;font-size:13px" onclick="openAddParticipante()"><i class="fa-solid fa-user-plus"></i> Adicionar</button>
           </div>
         </div>
-        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Última Realização</th><th>Próxima Realização</th></tr></thead>
+        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Última Realização</th><th>Próxima Realização</th><th>Pasta</th></tr></thead>
         <tbody id="td-page-tbody"></tbody></table>
         <div id="td-page-empty" class="detail-empty" style="display:none">
           <i class="fa-solid fa-users"></i>
@@ -1021,7 +1021,8 @@ function renderDetailEmps(list){
       :`<button class="btn-data-edit btn-data-empty" onclick="openRenovarParticipante(${_tdAtual},${f.id},'${f.nome.replace(/'/g,"\\'")}',null)"><i class="fa-solid fa-calendar-plus"></i> Registrar data</button>`;
     const proxDate=calcProxFront(f.data_realizacao,per);
     const proxTd=proxDate?`<span style="color:var(--t2);font-size:13px">${fmt(proxDate)}</span>`:`<span style="color:var(--t3);font-size:13px">—</span>`;
-    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td></tr>`;
+    const nomeEsc=f.nome.replace(/'/g,"\\'").replace(/"/g,'\\"');
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td><td><button class="ab ab-edit" title="Pasta de documentos" onclick="openDocs(${f.id},'${nomeEsc}')"><i class="fa-solid fa-folder-open"></i></button></td></tr>`;
   }).join('');
 }
 function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
