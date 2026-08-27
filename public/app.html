@@ -887,13 +887,19 @@ async function openModal(tipo) {
   if(tipo==='treinamento'){
     document.getElementById('t-modal-title').textContent='Novo Treinamento';
     document.getElementById('t-edit-id').value='';
-    document.getElementById('t-nome').value='';
     document.getElementById('t-outro-w').style.display='none';
     document.getElementById('t-outro').value='';
     document.getElementById('btn-criar-novo').innerHTML='<i class="fa-solid fa-plus"></i> Criar novo';
     document.getElementById('t-cat').value='NR';
     document.getElementById('t-per').value='Anual';
     document.getElementById('t-ch').value='';
+    const _predefinidos=['NR-05 – CIPA','NR-06 – EPI','NR-10 – Instalações Elétricas','NR-11 – Transporte e Armazenagem','NR-12 – Máquinas e Equipamentos','NR-18 – Construção Civil','NR-20 – Inflamáveis e Combustíveis','NR-23 – Combate a Incêndio','NR-33 – Espaço Confinado','NR-35 – Trabalho em Altura','Direção Defensiva','Primeiros Socorros','Integração de Segurança'];
+    const selT=document.getElementById('t-nome');
+    selT.querySelectorAll('option[data-custom]').forEach(o=>o.remove());
+    const customNames=[...new Set((_cachedT||[]).map(t=>t.nome).filter(n=>!_predefinidos.includes(n)))];
+    const outroOpt=[...selT.options].find(o=>o.value==='Outro');
+    customNames.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;o.dataset.custom='1';selT.insertBefore(o,outroOpt);});
+    selT.value='';
   }
   const fNames=_cachedF.map(f=>f.nome);
   const dlAc=document.getElementById('fl-ac');
@@ -966,7 +972,13 @@ async function editT(id){
   const r=_cachedT.find(t=>t.id===id); if(!r)return;
   document.getElementById('t-modal-title').textContent='Editar Treinamento';
   document.getElementById('t-edit-id').value=r.id;
+  document.getElementById('btn-criar-novo').innerHTML='<i class="fa-solid fa-plus"></i> Criar novo';
   const nomeSel=document.getElementById('t-nome');
+  const _predefinidos=['NR-05 – CIPA','NR-06 – EPI','NR-10 – Instalações Elétricas','NR-11 – Transporte e Armazenagem','NR-12 – Máquinas e Equipamentos','NR-18 – Construção Civil','NR-20 – Inflamáveis e Combustíveis','NR-23 – Combate a Incêndio','NR-33 – Espaço Confinado','NR-35 – Trabalho em Altura','Direção Defensiva','Primeiros Socorros','Integração de Segurança'];
+  nomeSel.querySelectorAll('option[data-custom]').forEach(o=>o.remove());
+  const customNames=[...new Set((_cachedT||[]).map(t=>t.nome).filter(n=>!_predefinidos.includes(n)))];
+  const outroOpt=[...nomeSel.options].find(o=>o.value==='Outro');
+  customNames.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;o.dataset.custom='1';nomeSel.insertBefore(o,outroOpt);});
   const nomes=[...nomeSel.options].map(o=>o.value);
   if(nomes.includes(r.nome)){nomeSel.value=r.nome;document.getElementById('t-outro-w').style.display='none';}
   else{nomeSel.value='Outro';document.getElementById('t-outro-w').style.display='block';document.getElementById('t-outro').value=r.nome;}
