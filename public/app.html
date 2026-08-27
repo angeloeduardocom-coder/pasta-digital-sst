@@ -573,8 +573,8 @@
     <div class="modal-title"><div class="mtag"><i class="fa-solid fa-clipboard-list"></i></div> <span id="t-modal-title">Novo Treinamento</span></div>
     <input type="hidden" id="t-edit-id"/>
     <div class="field">
-      <label>Treinamento</label>
-      <select id="t-nome" onchange="document.getElementById('t-outro-w').style.display=this.value==='Outro'?'block':'none'">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><label style="margin-bottom:0">Treinamento</label><button type="button" id="btn-criar-novo" onclick="toggleCriarNovo()" style="background:none;border:none;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0"><i class="fa-solid fa-plus"></i> Criar novo</button></div>
+      <select id="t-nome" onchange="document.getElementById('t-outro-w').style.display=this.value==='Outro'?'block':'none';if(this.value!=='Outro'){document.getElementById('btn-criar-novo').innerHTML='<i class=\'fa-solid fa-plus\'></i> Criar novo';}">
         <option value="">Selecione...</option>
         <option>NR-05 – CIPA</option><option>NR-06 – EPI</option><option>NR-10 – Instalações Elétricas</option>
         <option>NR-11 – Transporte e Armazenagem</option><option>NR-12 – Máquinas e Equipamentos</option>
@@ -584,7 +584,7 @@
         <option>Primeiros Socorros</option><option>Integração de Segurança</option><option>Outro</option>
       </select>
     </div>
-    <div class="field" id="t-outro-w" style="display:none"><label>Especifique</label><input type="text" id="t-outro" placeholder="Nome do treinamento"/></div>
+    <div class="field" id="t-outro-w" style="display:none"><label>Nome do treinamento</label><input type="text" id="t-outro" placeholder="Ex: Treinamento de PCMSO"/></div>
     <div class="frow">
       <div class="field"><label>Categoria</label><select id="t-cat"><option value="NR">NR</option><option value="SST">SST</option><option value="Operacional">Operacional</option><option value="Emergência">Emergência</option></select></div>
       <div class="field"><label>Periodicidade</label><select id="t-per"><option>Anual</option><option>Bianual</option><option>Trianual</option><option>Quinquenal</option><option>Único</option></select></div>
@@ -890,6 +890,7 @@ async function openModal(tipo) {
     document.getElementById('t-nome').value='';
     document.getElementById('t-outro-w').style.display='none';
     document.getElementById('t-outro').value='';
+    document.getElementById('btn-criar-novo').innerHTML='<i class="fa-solid fa-plus"></i> Criar novo';
     document.getElementById('t-cat').value='NR';
     document.getElementById('t-per').value='Anual';
     document.getElementById('t-ch').value='';
@@ -932,6 +933,22 @@ async function renderT(search='') {
   document.getElementById('t-vencer').innerHTML=pv.length?pv.map(r=>`<tr><td>${r.nome}</td><td>${fmt(r.prox)}</td></tr>`).join(''):'<tr><td colspan="2" style="color:var(--t3);text-align:center;padding:14px 0;font-size:12px">Nenhum nos próximos 30 dias</td></tr>';
 }
 
+function toggleCriarNovo(){
+  const sel=document.getElementById('t-nome');
+  const btn=document.getElementById('btn-criar-novo');
+  const outro=document.getElementById('t-outro-w');
+  if(sel.value!=='Outro'){
+    sel.value='Outro';
+    outro.style.display='block';
+    document.getElementById('t-outro').focus();
+    btn.innerHTML='<i class="fa-solid fa-arrow-left"></i> Usar lista';
+  }else{
+    sel.value='';
+    outro.style.display='none';
+    document.getElementById('t-outro').value='';
+    btn.innerHTML='<i class="fa-solid fa-plus"></i> Criar novo';
+  }
+}
 async function saveT(){
   const nv=document.getElementById('t-nome').value;
   const nome=nv==='Outro'?document.getElementById('t-outro').value.trim():nv;
