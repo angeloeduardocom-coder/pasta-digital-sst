@@ -119,6 +119,7 @@
     .b-alert { background:var(--yellow-l); color:#92400E; } .b-alert .dot { background:var(--yellow); }
     .b-exp { background:var(--red-l); color:#991B1B; } .b-exp .dot { background:var(--red); }
     .b-prog { background:var(--blue-l); color:#1E40AF; } .b-prog .dot { background:var(--blue); }
+    .b-neu { background:#F1F5F9; color:#475569; } .b-neu .dot { background:#94A3B8; }
     .b-sched { background:var(--purple-l); color:#5B21B6; } .b-sched .dot { background:var(--purple); }
     .cat-badge { display:inline-block; padding:3px 9px; border-radius:6px; font-size:11px; font-weight:600; }
     .cNR { background:#F1F5F9; color:#334155; } .cSST { background:#ECFDF5; color:#065F46; }
@@ -519,7 +520,7 @@
             <button class="btn-primary" style="white-space:nowrap;height:36px;padding:0 14px;font-size:13px" onclick="openAddParticipante()"><i class="fa-solid fa-user-plus"></i> Adicionar</button>
           </div>
         </div>
-        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Última Realização</th><th>Próxima Realização</th><th>Pasta</th></tr></thead>
+        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Última Realização</th><th>Próxima Realização</th><th>Validade</th><th>Pasta</th></tr></thead>
         <tbody id="td-page-tbody"></tbody></table>
         <div id="td-page-empty" class="detail-empty" style="display:none">
           <i class="fa-solid fa-users"></i>
@@ -1022,7 +1023,10 @@ function renderDetailEmps(list){
     const proxDate=calcProxFront(f.data_realizacao,per);
     const proxTd=proxDate?`<span style="color:var(--t2);font-size:13px">${fmt(proxDate)}</span>`:`<span style="color:var(--t3);font-size:13px">—</span>`;
     const nomeEsc=f.nome.replace(/'/g,"\\'").replace(/"/g,'\\"');
-    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td><td><button class="ab ab-edit" title="Pasta de documentos" onclick="openDocs(${f.id},'${nomeEsc}')"><i class="fa-solid fa-folder-open"></i></button></td></tr>`;
+    let valBadge;
+    if(!proxDate){valBadge=`<span class="badge b-neu"><span class="dot"></span>Pendente</span>`;}
+    else{const hoje=new Date();hoje.setHours(0,0,0,0);const prox=new Date(proxDate+'T00:00:00');const diff=Math.ceil((prox-hoje)/(1000*60*60*24));if(diff<0){valBadge=`<span class="badge b-exp"><span class="dot"></span>Vencido</span>`;}else if(diff<=30){valBadge=`<span class="badge b-alert"><span class="dot"></span>A Vencer</span>`;}else{valBadge=`<span class="badge b-ok"><span class="dot"></span>Válido</span>`;}}
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td><td>${valBadge}</td><td><button class="ab ab-edit" title="Pasta de documentos" onclick="openDocs(${f.id},'${nomeEsc}')"><i class="fa-solid fa-folder-open"></i></button></td></tr>`;
   }).join('');
 }
 function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
