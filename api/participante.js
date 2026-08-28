@@ -37,6 +37,18 @@ module.exports = async (req, res) => {
       return res.json({ ok: true });
     }
 
+    if (req.method === 'DELETE') {
+      const { treinamento_id, funcionario_id } = req.query;
+      if (!treinamento_id || !funcionario_id) {
+        return res.status(400).json({ error: 'Dados incompletos' });
+      }
+      await sql`
+        DELETE FROM treinamento_participantes
+        WHERE treinamento_id = ${treinamento_id} AND funcionario_id = ${funcionario_id}
+      `;
+      return res.json({ ok: true });
+    }
+
     res.status(405).json({ error: 'Método não permitido' });
   } catch (err) {
     console.error(err);

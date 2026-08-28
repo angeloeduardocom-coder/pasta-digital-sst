@@ -1055,10 +1055,21 @@ function renderDetailEmps(list){
     let valBadge;
     if(!proxDate){valBadge=`<span class="badge b-neu"><span class="dot"></span>Pendente</span>`;}
     else{const hoje=new Date();hoje.setHours(0,0,0,0);const prox=new Date(proxDate+'T00:00:00');const diff=Math.ceil((prox-hoje)/(1000*60*60*24));if(diff<0){valBadge=`<span class="badge b-exp"><span class="dot"></span>Vencido</span>`;}else if(diff<=30){valBadge=`<span class="badge b-alert"><span class="dot"></span>A Vencer</span>`;}else{valBadge=`<span class="badge b-ok"><span class="dot"></span>Válido</span>`;}}
-    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td><td>${valBadge}</td><td><button class="ab ab-edit" title="Pasta de documentos" onclick="openDocs(${f.id},'${nomeEsc}')"><i class="fa-solid fa-folder-open"></i></button></td></tr>`;
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td><td>${valBadge}</td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Pasta de documentos" onclick="openDocs(${f.id},'${nomeEsc}')"><i class="fa-solid fa-folder-open"></i></button><button class="ab" title="Remover do treinamento" style="color:#EF4444" onclick="removeParticipante(${_tdAtual},${f.id},'${nomeEsc}')"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
   }).join('');
 }
 function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
+async function removeParticipante(tid,fid,nome){
+  if(!confirm(`Remover ${nome} deste treinamento?`))return;
+  try{
+    const r=await fetch(`/api/participante?treinamento_id=${tid}&funcionario_id=${fid}`,{method:'DELETE',headers:{'Authorization':'Bearer '+localStorage.getItem('sst_token')}});
+    if(!r.ok){const e=await r.json();throw new Error(e.error);}
+    _cachedT=[];
+    const all=await API.get('treinamentos');_cachedT=all;
+    const tr=all.find(t=>t.id===tid);
+    if(tr){_tdEmps=tr.funcs||[];renderDetailEmps(_tdEmps);document.getElementById('td-page-sub').textContent=`${tr.cat} · ${tr.per} · ${_tdEmps.length} participante${_tdEmps.length!==1?'s':''}`;}
+  }catch(e){alert('Erro: '+e.message);}
+}
 function voltarTreinamentos(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-treinamentos').classList.add('active');
