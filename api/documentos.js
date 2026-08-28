@@ -45,7 +45,8 @@ module.exports = async (req, res) => {
 
       await new Promise((resolve, reject) => {
         bb.on('file', (name, file, info) => {
-          fileName = info.filename || 'arquivo';
+          const raw = info.filename || 'arquivo';
+          fileName = raw.replace(/[\u{FEFF}\u{200B}-\u{200D}\u{FFFE}\u{FFFF}]/gu, '').replace(/[^\w.\-() ]/g, '_').trim() || 'arquivo';
           mimeType = info.mimeType || 'application/octet-stream';
           const chunks = [];
           file.on('data', chunk => chunks.push(chunk));
