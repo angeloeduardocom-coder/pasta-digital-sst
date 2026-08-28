@@ -810,7 +810,7 @@ async function renderInicio() {
 
   const fAtivos=F.filter(f=>f.status==='Ativo').length;
   const tTot=T.length, tVenc=T.filter(r=>r.status==='Vencido').length;
-  const tConc=T.filter(r=>r.status==='Concluído').length, tAg=T.filter(r=>r.status==='Agendado').length, tEm=T.filter(r=>r.status==='Em Andamento').length;
+  const tConc=T.filter(r=>r.status==='Concluído').length, tAg=T.filter(r=>r.status==='Sem data').length, tEm=T.filter(r=>r.status==='Vencendo').length;
   const iTot=I.length, acTot=AC.length;
   const exTot=EX.length, exOk=EX.filter(r=>sitEx(r.prox)==='ok').length;
   const exAlert=EX.filter(r=>sitEx(r.prox)==='alert').length, exVenc=EX.filter(r=>sitEx(r.prox)==='exp').length;
@@ -831,7 +831,7 @@ async function renderInicio() {
   const extProbs=[...EX.filter(r=>sitEx(r.prox)==='exp').map(r=>({label:`${r.id_num} – ${r.local||r.tipo} (Vencido)`,cls:'b-exp'})),...EX.filter(r=>sitEx(r.prox)==='alert').map(r=>({label:`${r.id_num} – ${r.local||r.tipo} (Vencendo ${fmt(r.prox)})`,cls:'b-alert'}))];
   document.getElementById('dash-ext-alerta').innerHTML=extProbs.length?`<div class="dash-alert-banner" style="background:#FFF1F2;border-color:#FECDD3;margin-bottom:12px"><span class="ban-icon"><i class="fa-solid fa-fire-extinguisher" style="color:#E11D48"></i></span><div><div class="ban-title" style="color:#9F1239">${extProbs.length} extintor${extProbs.length>1?'es':''} com situação irregular</div><div class="ban-sub" style="color:#BE123C">Verifique os extintores vencidos ou próximos do vencimento</div></div><div class="dash-alert-strip" style="margin:0;flex:1;justify-content:flex-end">${extProbs.slice(0,5).map(a=>`<span class="badge ${a.cls}"><span class="dot"></span>${a.label}</span>`).join('')}${extProbs.length>5?`<span class="badge b-alert"><span class="dot"></span>+${extProbs.length-5} mais</span>`:''}</div></div>`:'';
 
-  donut('dash-ct',['Concluído','Agendado','Em Andamento','Vencido'],[tConc,tAg,tEm,tVenc],['#10B981','#8B5CF6','#3B82F6','#EF4444']);
+  donut('dash-ct',['Concluído','Sem data','Vencendo','Vencido'],[tConc,tAg,tEm,tVenc],['#10B981','#8B5CF6','#F59E0B','#EF4444']);
   donut('dash-cex',['Em Dia','Vencendo','Vencido'],[exOk,exAlert,exVenc],['#10B981','#F59E0B','#EF4444']);
   const fA=F.filter(f=>f.status==='Ativo').length, fAf=F.filter(f=>f.status==='Afastado').length, fD=F.filter(f=>f.status==='Desligado').length;
   donut('dash-cf',['Ativo','Afastado','Desligado'],[fA,fAf,fD],['#10B981','#F59E0B','#94A3B8']);
