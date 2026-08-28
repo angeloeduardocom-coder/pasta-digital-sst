@@ -940,8 +940,19 @@ async function renderT(search='') {
     }).join('');
   }
   donut('chart-ts',['Concluído','Sem data','Vencendo','Vencido'],[conc,ag,em,venc],['#10B981','#8B5CF6','#F59E0B','#EF4444']);
-  const pv=all.filter(r=>r.prox&&svenc(r.prox)==='alert').sort((a,b)=>new Date(toISO(a.prox))-new Date(toISO(b.prox))).slice(0,6);
-  document.getElementById('t-vencer').innerHTML=pv.length?pv.map(r=>`<tr><td>${r.nome}</td><td>${fmt(r.prox)}</td></tr>`).join(''):'<tr><td colspan="2" style="color:var(--t3);text-align:center;padding:14px 0;font-size:12px">Nenhum nos próximos 30 dias</td></tr>';
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const pvFunc=[];
+  all.forEach(t=>{
+    (t.funcs||[]).forEach(f=>{
+      const prox=calcProxFront(f.data_realizacao,t.per);
+      if(!prox)return;
+      const dp=new Date(prox+'T00:00:00');
+      const diff=Math.ceil((dp-hoje)/(1000*60*60*24));
+      if(diff>=0&&diff<=30)pvFunc.push({func:f.nome,trein:t.nome,prox,diff});
+    });
+  });
+  pvFunc.sort((a,b)=>a.diff-b.diff);
+  document.getElementById('t-vencer').innerHTML=pvFunc.length?pvFunc.slice(0,8).map(p=>`<tr><td><strong style="font-weight:600;font-size:12.5px">${p.func}</strong><div style="font-size:11px;color:var(--t3)">${p.trein}</div></td><td style="white-space:nowrap;color:${p.diff<=7?'var(--red)':'var(--yellow)'};font-weight:600;font-size:12px">${fmt(p.prox)}</td></tr>`).join(''):'<tr><td colspan="2" style="color:var(--t3);text-align:center;padding:14px 0;font-size:12px">Nenhum nos próximos 30 dias</td></tr>';
 }
 
 function toggleCriarNovo(){
