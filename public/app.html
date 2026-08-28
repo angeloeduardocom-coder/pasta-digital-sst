@@ -932,7 +932,12 @@ async function renderT(search='') {
   if(!list.length){tbody.innerHTML='';empty.style.display='block';}
   else{
     empty.style.display='none';
-    tbody.innerHTML=list.map((r,i)=>`<tr onclick="openTrainingDetail(${r.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></td><td style="color:var(--t2)">${fmt(r.ult)}</td><td style="color:var(--t2)">${fmt(r.prox)}</td><td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="color:var(--t2)">${(r.funcs||[]).length}</td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="event.stopPropagation();editT(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="event.stopPropagation();delT(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+    tbody.innerHTML=list.map((r,i)=>{
+      const datas=(r.funcs||[]).map(f=>f.data_realizacao).filter(Boolean).sort();
+      const ultMax=datas.length?datas[datas.length-1]:null;
+      const proxMax=calcProxFront(ultMax,r.per);
+      return `<tr onclick="openTrainingDetail(${r.id})"><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td><span class="cat-badge ${catCls[r.cat]||'cNR'}">${r.cat}</span></td><td style="color:var(--t2)">${fmt(ultMax)}</td><td style="color:var(--t2)">${fmt(proxMax)}</td><td><span class="badge ${stCls[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="color:var(--t2)">${(r.funcs||[]).length}</td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="event.stopPropagation();editT(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="event.stopPropagation();delT(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+    }).join('');
   }
   donut('chart-ts',['Concluído','Sem data','Vencendo','Vencido'],[conc,ag,em,venc],['#10B981','#8B5CF6','#F59E0B','#EF4444']);
   const pv=all.filter(r=>r.prox&&svenc(r.prox)==='alert').sort((a,b)=>new Date(toISO(a.prox))-new Date(toISO(b.prox))).slice(0,6);
