@@ -175,7 +175,7 @@
     .btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(22,163,74,.45); }
 
     /* DASHBOARD */
-    .dash-charts-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:12px; }
+    .dash-charts-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
     .dash-charts-grid .chart-card { padding:10px 12px; }
     .dash-charts-grid .chart-card h4 { font-size:11px; margin-bottom:6px; }
     .dash-charts-grid .chart-card { animation:chartIn .45s ease both; }
@@ -278,7 +278,7 @@
       .split-side { width:100% !important; flex-shrink:1 !important; margin-left:0; display:flex; flex-direction:row; flex-wrap:wrap; gap:12px; }
       .split-side > * { flex:1; min-width:220px; }
       .split-handle { display:none !important; }
-      .dash-charts-grid { grid-template-columns:repeat(2,1fr) !important; }
+      .dash-charts-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
       .twin { flex-direction:column; }
       .twin .tcard { min-height:280px; }
       .tcard { overflow-x:auto; }
