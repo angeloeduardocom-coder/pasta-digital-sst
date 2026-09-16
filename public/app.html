@@ -874,7 +874,10 @@ async function renderInicio() {
   const iS=I.filter(r=>r.res==='Satisfatório').length, iP=I.filter(r=>r.res==='Parcialmente Satisfatório').length, iI=I.filter(r=>r.res==='Insatisfatório').length;
   donut('dash-ci',['Satisfatório','Parcial','Insatisfatório'],[iS,iP,iI],['#10B981','#F59E0B','#EF4444']);
   const acS=AC.filter(r=>r.cat==='Sim').length, acP=AC.filter(r=>r.cat==='Em processo').length, acN=AC.filter(r=>r.cat==='Não').length;
-  donut('dash-cac',['CAT Emitida','Em Processo','Sem CAT'],[acS,acP,acN],['#10B981','#F59E0B','#EF4444']);
+  const acO=AC.length-acS-acP-acN;
+  const acLabels=['CAT Emitida','Em Processo','Sem CAT'], acData=[acS,acP,acN], acColors=['#10B981','#F59E0B','#EF4444'];
+  if(acO>0){acLabels.push('Outro');acData.push(acO);acColors.push('#94A3B8');}
+  donut('dash-cac',acLabels,acData,acColors);
 
   const pv=[];
   T.filter(r=>r.prox&&svenc(r.prox)==='alert').forEach(r=>pv.push({nome:r.nome,tipo:'Treinamento',data:r.prox}));
@@ -1358,18 +1361,21 @@ async function openVisualizarPorNome(nome) {
   ['vz-cargo','vz-setor','vz-status','vz-matricula','vz-contato','vz-supervisor','vz-empregador'].forEach(id=>document.getElementById(id).textContent='—');
   document.getElementById('vz-docs').innerHTML='<div class="doc-empty"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>';
   document.getElementById('modal-visualizar').classList.add('open');
-  let all;
-  try{
-    all=await API.get('funcionarios');
-  }catch(e){
-    if(reqId===_vzReqId)document.getElementById('vz-docs').innerHTML='<div class="doc-empty">Erro ao carregar dados.</div>';
-    return;
+  let all=_cachedF&&_cachedF.length?_cachedF:null;
+  if(!all){
+    try{
+      all=await API.get('funcionarios');
+    }catch(e){
+      if(reqId===_vzReqId)document.getElementById('vz-docs').innerHTML='<div class="doc-empty">Erro ao carregar dados.</div>';
+      return;
+    }
+    if(reqId!==_vzReqId)return;
   }
-  if(reqId!==_vzReqId)return;
   const alvo=(nome||'').trim().toLowerCase();
-  const f=(all||[]).find(x=>(x.nome||'').trim().toLowerCase()===alvo);
-  if(!f){document.getElementById('vz-docs').innerHTML='<div class="doc-empty">Funcionário não localizado no cadastro (nome pode divergir).</div>';return;}
-  await _renderVisualizar(f);
+  const matches=(all||[]).filter(x=>(x.nome||'').trim().toLowerCase()===alvo);
+  if(!matches.length){document.getElementById('vz-docs').innerHTML='<div class="doc-empty">Funcionário não localizado no cadastro (nome pode divergir).</div>';return;}
+  if(matches.length>1){document.getElementById('vz-docs').innerHTML=`<div class="doc-empty">Existem ${matches.length} funcionários cadastrados com esse nome — não é possível identificar automaticamente qual gerou o acidente. Verifique o cadastro de Funcionários.</div>`;return;}
+  await _renderVisualizar(matches[0]);
 }
 async function openDocs(fid, nome) {
   document.getElementById('doc-func-id').value=fid;
