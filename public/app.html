@@ -466,8 +466,8 @@
           <h3>Lista de Funcionários</h3>
           <div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar funcionário..." oninput="renderF(this.value)"/></div>
         </div>
-        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Admissão</th><th>Status</th><th></th></tr></thead>
-        <tbody id="tbody-f"></tbody></table>
+        <div class="table-scroll"><table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Matrícula</th><th>Supervisor</th><th>Admissão</th><th>Status</th><th></th></tr></thead>
+        <tbody id="tbody-f"></tbody></table></div>
         <div id="empty-f" class="empty" style="display:none">
           <span class="ei"><i class="fa-solid fa-users"></i></span>
           <p>Nenhum funcionário cadastrado.<br>Clique em <strong>+ Novo Funcionário</strong> para começar.</p>
@@ -633,6 +633,14 @@
     <div class="frow">
       <div class="field"><label>Data de Admissão</label><input type="date" id="f-adm"/></div>
       <div class="field"><label>Status</label><select id="f-stat"><option>Ativo</option><option>Afastado</option><option>Desligado</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Matrícula</label><input type="text" id="f-matricula" placeholder="Ex: 00123"/></div>
+      <div class="field"><label>Contato</label><input type="text" id="f-contato" placeholder="Telefone"/></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Empregador</label><input type="text" id="f-empregador" placeholder="Ex: Fazenda Nova Neruda"/></div>
+      <div class="field"><label>Supervisor</label><input type="text" id="f-supervisor" placeholder="Nome do supervisor"/></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('funcionario')">Cancelar</button>
@@ -881,7 +889,7 @@ async function openModal(tipo) {
   if(tipo==='funcionario'){
     document.getElementById('f-modal-title').textContent='Novo Funcionário';
     document.getElementById('f-edit-id').value='';
-    ['f-nome','f-cargo','f-setor','f-adm'].forEach(id=>document.getElementById(id).value='');
+    ['f-nome','f-cargo','f-setor','f-adm','f-matricula','f-contato','f-empregador','f-supervisor'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('f-stat').value='Ativo';
   }
   if(tipo==='treinamento'){
@@ -1187,7 +1195,7 @@ async function renderF(search=''){
   const sc={Ativo:'b-ok',Afastado:'b-alert',Desligado:'b-exp'};
   if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td style="color:var(--t2)">${r.cargo||'—'}</td><td style="color:var(--t2)">${r.setor||'—'}</td><td style="color:var(--t2)">${fmt(r.adm)}</td><td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="editF(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.nome}</strong></td><td style="color:var(--t2)">${r.cargo||'—'}</td><td style="color:var(--t2)">${r.setor||'—'}</td><td style="color:var(--t2)">${r.matricula||'—'}</td><td style="color:var(--t2)">${r.supervisor||'—'}</td><td style="color:var(--t2)">${fmt(r.adm)}</td><td><span class="badge ${sc[r.status]||'b-ok'}"><span class="dot"></span>${r.status}</span></td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Editar" onclick="editF(${r.id})"><i class="fa-solid fa-pen"></i></button><button class="ab" title="Excluir" onclick="delF(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
 }
 function editF(id){
   const f=_cachedF.find(r=>r.id===id); if(!f)return;
@@ -1198,13 +1206,17 @@ function editF(id){
   document.getElementById('f-setor').value=f.setor||'';
   document.getElementById('f-adm').value=f.adm?toISO(f.adm):'';
   document.getElementById('f-stat').value=f.status||'Ativo';
+  document.getElementById('f-matricula').value=f.matricula||'';
+  document.getElementById('f-contato').value=f.contato||'';
+  document.getElementById('f-empregador').value=f.empregador||'';
+  document.getElementById('f-supervisor').value=f.supervisor||'';
   document.getElementById('modal-funcionario').classList.add('open');
 }
 async function saveF(){
   const nome=document.getElementById('f-nome').value.trim();
   if(!nome){alert('Informe o nome.');return;}
   const editId=+document.getElementById('f-edit-id').value;
-  const data={nome,cargo:document.getElementById('f-cargo').value,setor:document.getElementById('f-setor').value,adm:document.getElementById('f-adm').value||null,status:document.getElementById('f-stat').value};
+  const data={nome,cargo:document.getElementById('f-cargo').value,setor:document.getElementById('f-setor').value,adm:document.getElementById('f-adm').value||null,status:document.getElementById('f-stat').value,matricula:document.getElementById('f-matricula').value,contato:document.getElementById('f-contato').value,empregador:document.getElementById('f-empregador').value,supervisor:document.getElementById('f-supervisor').value};
   try{
     if(editId){const updated=await API.put('funcionarios',editId,data);_cachedF=_cachedF.map(f=>f.id===editId?updated:f);_tdEmps=_tdEmps.map(f=>f.id===editId?updated:f);}
     else{await API.post('funcionarios',data);_cachedF=[];}
