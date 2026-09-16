@@ -683,6 +683,32 @@
   </div>
 </div>
 
+<div class="overlay" id="modal-visualizar">
+  <div class="modal" style="width:440px">
+    <div class="modal-title"><div class="mtag"><i class="fa-solid fa-eye"></i></div> <span id="vz-nome">Colaborador</span></div>
+    <div class="frow">
+      <div class="field"><label>Cargo</label><p id="vz-cargo" style="font-size:14px;margin:0">—</p></div>
+      <div class="field"><label>Setor</label><p id="vz-setor" style="font-size:14px;margin:0">—</p></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Status</label><p id="vz-status" style="font-size:14px;margin:0">—</p></div>
+      <div class="field"><label>Matrícula</label><p id="vz-matricula" style="font-size:14px;margin:0">—</p></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Contato</label><p id="vz-contato" style="font-size:14px;margin:0">—</p></div>
+      <div class="field"><label>Supervisor</label><p id="vz-supervisor" style="font-size:14px;margin:0">—</p></div>
+    </div>
+    <div class="field"><label>Empregador</label><p id="vz-empregador" style="font-size:14px;margin:0">—</p></div>
+    <div class="field">
+      <label>Documentos Anexados</label>
+      <div id="vz-docs" style="max-height:200px;overflow-y:auto"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('visualizar')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="modal-documentos">
   <div class="modal" style="width:540px">
     <div class="modal-title"><div class="mtag"><i class="fa-solid fa-folder-open"></i></div> <span id="doc-func-nome">Documentos</span></div>
@@ -1079,7 +1105,7 @@ function renderDetailEmps(list){
     let valBadge;
     if(!proxDate){valBadge=`<span class="badge b-neu"><span class="dot"></span>Pendente</span>`;}
     else{const hoje=new Date();hoje.setHours(0,0,0,0);const prox=new Date(proxDate+'T00:00:00');const diff=Math.ceil((prox-hoje)/(1000*60*60*24));if(diff<0){valBadge=`<span class="badge b-exp"><span class="dot"></span>Vencido</span>`;}else if(diff<=30){valBadge=`<span class="badge b-alert"><span class="dot"></span>A Vencer</span>`;}else{valBadge=`<span class="badge b-ok"><span class="dot"></span>Válido</span>`;}}
-    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td><td>${valBadge}</td><td style="display:flex;gap:6px"><button class="ab ab-edit" title="Pasta de documentos" onclick="openDocs(${f.id},'${nomeEsc}')"><i class="fa-solid fa-folder-open"></i></button><button class="ab" title="Remover do treinamento" style="color:#EF4444" onclick="removeParticipante(${_tdAtual},${f.id},'${nomeEsc}')"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${f.nome}</strong></td><td style="color:var(--t2)">${f.cargo||'—'}</td><td style="color:var(--t2)">${f.setor||'—'}</td><td><span class="badge ${sc[f.status]||'b-ok'}"><span class="dot"></span>${f.status}</span></td><td>${ultBtn}</td><td>${proxTd}</td><td>${valBadge}</td><td style="display:flex;gap:6px"><button class="ab" title="Visualização rápida" onclick="openVisualizar(${f.id})"><i class="fa-solid fa-eye"></i></button><button class="ab ab-edit" title="Pasta de documentos" onclick="openDocs(${f.id},'${nomeEsc}')"><i class="fa-solid fa-folder-open"></i></button><button class="ab" title="Remover do treinamento" style="color:#EF4444" onclick="removeParticipante(${_tdAtual},${f.id},'${nomeEsc}')"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
   }).join('');
 }
 function filterDetailEmps(s){renderDetailEmps(_tdEmps.filter(f=>(f.nome+f.cargo+f.setor).toLowerCase().includes(s.toLowerCase())));}
@@ -1289,6 +1315,26 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 });
 
 // ── DOCUMENTOS ──
+async function openVisualizar(fid) {
+  const f=_tdEmps.find(x=>x.id===fid); if(!f)return;
+  document.getElementById('vz-nome').textContent=f.nome;
+  document.getElementById('vz-cargo').textContent=f.cargo||'—';
+  document.getElementById('vz-setor').textContent=f.setor||'—';
+  document.getElementById('vz-status').textContent=f.status||'—';
+  document.getElementById('vz-matricula').textContent=f.matricula||'—';
+  document.getElementById('vz-contato').textContent=f.contato||'—';
+  document.getElementById('vz-supervisor').textContent=f.supervisor||'—';
+  document.getElementById('vz-empregador').textContent=f.empregador||'—';
+  const docsEl=document.getElementById('vz-docs');
+  docsEl.innerHTML='<div class="doc-empty"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>';
+  document.getElementById('modal-visualizar').classList.add('open');
+  const docs=await API.get('documentos?funcionario_id='+fid);
+  if(!docs||!docs.length){docsEl.innerHTML='<div class="doc-empty">Nenhum documento anexado.</div>';return;}
+  docsEl.innerHTML=docs.map(d=>{
+    const sz=d.tamanho?(d.tamanho<1048576?(d.tamanho/1024).toFixed(1)+' KB':(d.tamanho/1048576).toFixed(1)+' MB'):'';
+    return `<div class="doc-item"><div class="doc-info"><div class="doc-name">${d.nome}</div><div class="doc-size">${sz}</div></div><a href="${d.url}" target="_blank" class="ab ab-edit" title="Abrir"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></div>`;
+  }).join('');
+}
 async function openDocs(fid, nome) {
   document.getElementById('doc-func-id').value=fid;
   document.getElementById('doc-func-nome').textContent=nome;
