@@ -175,7 +175,7 @@
     .btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(22,163,74,.45); }
 
     /* DASHBOARD */
-    .dash-charts-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
+    .dash-charts-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:12px; }
     .dash-charts-grid .chart-card { padding:10px 12px; }
     .dash-charts-grid .chart-card h4 { font-size:11px; margin-bottom:6px; }
     .dash-charts-grid .chart-card { animation:chartIn .45s ease both; }
@@ -183,6 +183,7 @@
     .dash-charts-grid .chart-card:nth-child(2) { animation-delay:.15s; }
     .dash-charts-grid .chart-card:nth-child(3) { animation-delay:.25s; }
     .dash-charts-grid .chart-card:nth-child(4) { animation-delay:.35s; }
+    .dash-charts-grid .chart-card:nth-child(5) { animation-delay:.45s; }
     @keyframes chartIn { from{opacity:0;transform:translateY(10px) scale(.96)} to{opacity:1;transform:none} }
     .dash-alert-strip { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
     .dash-alert-banner { background:#FFF7ED; border:1px solid #FED7AA; border-radius:var(--radius); padding:12px 18px; margin-bottom:16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -360,6 +361,7 @@
         <div class="chart-card"><h4>Extintores por Situação</h4><canvas id="dash-cex" height="110"></canvas></div>
         <div class="chart-card"><h4>Funcionários por Status</h4><canvas id="dash-cf" height="110"></canvas></div>
         <div class="chart-card"><h4>Inspeções por Resultado</h4><canvas id="dash-ci" height="110"></canvas></div>
+        <div class="chart-card"><h4>Acidentes por CAT</h4><canvas id="dash-cac" height="110"></canvas></div>
       </div>
       <div class="split">
         <div class="split-main">
@@ -520,7 +522,7 @@
             <button class="btn-primary" style="white-space:nowrap;height:36px;padding:0 14px;font-size:13px" onclick="openAddParticipante()"><i class="fa-solid fa-user-plus"></i> Adicionar</button>
           </div>
         </div>
-        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Última Realização</th><th>Próxima Realização</th><th>Validade</th><th>Pasta</th></tr></thead>
+        <table><thead><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Setor</th><th>Status</th><th>Última Realização</th><th>Próxima Realização</th><th>Validade</th><th>Ações</th></tr></thead>
         <tbody id="td-page-tbody"></tbody></table>
         <div id="td-page-empty" class="detail-empty" style="display:none">
           <i class="fa-solid fa-users"></i>
@@ -871,6 +873,8 @@ async function renderInicio() {
   donut('dash-cf',['Ativo','Afastado','Desligado'],[fA,fAf,fD],['#10B981','#F59E0B','#94A3B8']);
   const iS=I.filter(r=>r.res==='Satisfatório').length, iP=I.filter(r=>r.res==='Parcialmente Satisfatório').length, iI=I.filter(r=>r.res==='Insatisfatório').length;
   donut('dash-ci',['Satisfatório','Parcial','Insatisfatório'],[iS,iP,iI],['#10B981','#F59E0B','#EF4444']);
+  const acS=AC.filter(r=>r.cat==='Sim').length, acP=AC.filter(r=>r.cat==='Em processo').length, acN=AC.filter(r=>r.cat==='Não').length;
+  donut('dash-cac',['CAT Emitida','Em Processo','Sem CAT'],[acS,acP,acN],['#10B981','#F59E0B','#EF4444']);
 
   const pv=[];
   T.filter(r=>r.prox&&svenc(r.prox)==='alert').forEach(r=>pv.push({nome:r.nome,tipo:'Treinamento',data:r.prox}));
@@ -1280,7 +1284,7 @@ async function renderAc(search=''){
   const cc={Sim:'b-ok','Em processo':'b-alert','Não':'b-exp'};
   if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=list.map((r,i)=>`<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.func}</strong></td><td style="color:var(--t2);white-space:nowrap">${fmt(r.data)}</td><td style="color:var(--t2)">${r.tipo||'—'}</td><td><span class="badge ${cc[r.cat]||'b-alert'}"><span class="dot"></span>${r.cat}</span></td><td><button class="ab" onclick="delAc(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+  tbody.innerHTML=list.map((r,i)=>{const nomeEsc=(r.func||'').replace(/'/g,"\\'").replace(/"/g,'\\"');return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.func}</strong></td><td style="color:var(--t2);white-space:nowrap">${fmt(r.data)}</td><td style="color:var(--t2)">${r.tipo||'—'}</td><td><span class="badge ${cc[r.cat]||'b-alert'}"><span class="dot"></span>${r.cat}</span></td><td style="display:flex;gap:6px"><button class="ab" title="Visualização rápida" onclick="openVisualizarPorNome('${nomeEsc}')"><i class="fa-solid fa-eye"></i></button><button class="ab" onclick="delAc(${r.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;}).join('');
 }
 async function saveAc(){
   const func=document.getElementById('ac-func').value.trim(), data=document.getElementById('ac-data').value;
@@ -1315,8 +1319,9 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 });
 
 // ── DOCUMENTOS ──
-async function openVisualizar(fid) {
-  const f=_tdEmps.find(x=>x.id===fid); if(!f)return;
+function escHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let _vzReqId=0;
+async function _renderVisualizar(f) {
   document.getElementById('vz-nome').textContent=f.nome;
   document.getElementById('vz-cargo').textContent=f.cargo||'—';
   document.getElementById('vz-setor').textContent=f.setor||'—';
@@ -1328,12 +1333,43 @@ async function openVisualizar(fid) {
   const docsEl=document.getElementById('vz-docs');
   docsEl.innerHTML='<div class="doc-empty"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>';
   document.getElementById('modal-visualizar').classList.add('open');
-  const docs=await API.get('documentos?funcionario_id='+fid);
+  const reqId=++_vzReqId;
+  let docs;
+  try{
+    docs=await API.get('documentos?funcionario_id='+f.id);
+  }catch(e){
+    if(reqId===_vzReqId)docsEl.innerHTML='<div class="doc-empty">Erro ao carregar documentos.</div>';
+    return;
+  }
+  if(reqId!==_vzReqId)return;
   if(!docs||!docs.length){docsEl.innerHTML='<div class="doc-empty">Nenhum documento anexado.</div>';return;}
   docsEl.innerHTML=docs.map(d=>{
     const sz=d.tamanho?(d.tamanho<1048576?(d.tamanho/1024).toFixed(1)+' KB':(d.tamanho/1048576).toFixed(1)+' MB'):'';
-    return `<div class="doc-item"><div class="doc-info"><div class="doc-name">${d.nome}</div><div class="doc-size">${sz}</div></div><a href="${d.url}" target="_blank" class="ab ab-edit" title="Abrir"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></div>`;
+    return `<div class="doc-item"><div class="doc-info"><div class="doc-name">${escHtml(d.nome)}</div><div class="doc-size">${sz}</div></div><a href="${escHtml(d.url)}" target="_blank" class="ab ab-edit" title="Abrir"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></div>`;
   }).join('');
+}
+async function openVisualizar(fid) {
+  const f=_tdEmps.find(x=>x.id===fid); if(!f)return;
+  await _renderVisualizar(f);
+}
+async function openVisualizarPorNome(nome) {
+  const reqId=++_vzReqId;
+  document.getElementById('vz-nome').textContent=nome;
+  ['vz-cargo','vz-setor','vz-status','vz-matricula','vz-contato','vz-supervisor','vz-empregador'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('vz-docs').innerHTML='<div class="doc-empty"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>';
+  document.getElementById('modal-visualizar').classList.add('open');
+  let all;
+  try{
+    all=await API.get('funcionarios');
+  }catch(e){
+    if(reqId===_vzReqId)document.getElementById('vz-docs').innerHTML='<div class="doc-empty">Erro ao carregar dados.</div>';
+    return;
+  }
+  if(reqId!==_vzReqId)return;
+  const alvo=(nome||'').trim().toLowerCase();
+  const f=(all||[]).find(x=>(x.nome||'').trim().toLowerCase()===alvo);
+  if(!f){document.getElementById('vz-docs').innerHTML='<div class="doc-empty">Funcionário não localizado no cadastro (nome pode divergir).</div>';return;}
+  await _renderVisualizar(f);
 }
 async function openDocs(fid, nome) {
   document.getElementById('doc-func-id').value=fid;

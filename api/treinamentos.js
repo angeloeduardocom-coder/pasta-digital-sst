@@ -28,6 +28,8 @@ module.exports = async (req, res) => {
             json_agg(json_build_object(
               'id', f.id, 'nome', f.nome, 'cargo', f.cargo, 'setor', f.setor,
               'adm', f.adm, 'status', f.status,
+              'matricula', f.matricula, 'contato', f.contato,
+              'empregador', f.empregador, 'supervisor', f.supervisor,
               'data_realizacao', tp.data_realizacao
             )) FILTER (WHERE f.id IS NOT NULL), '[]'
           ) AS funcs
@@ -121,6 +123,8 @@ module.exports = async (req, res) => {
             json_agg(json_build_object(
               'id', f.id, 'nome', f.nome, 'cargo', f.cargo, 'setor', f.setor,
               'adm', f.adm, 'status', f.status,
+              'matricula', f.matricula, 'contato', f.contato,
+              'empregador', f.empregador, 'supervisor', f.supervisor,
               'data_realizacao', tp.data_realizacao
             )) FILTER (WHERE f.id IS NOT NULL), '[]'
           ) AS funcs
