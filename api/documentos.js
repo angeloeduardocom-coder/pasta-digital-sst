@@ -1,5 +1,4 @@
-const { put, del } = require('@vercel/blob');
-const Busboy = require('busboy');
+const { del } = require('@vercel/blob');
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
 
@@ -35,39 +34,20 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
+      // O arquivo já foi enviado direto do navegador pro Vercel Blob
+      // (ver api/upload-url.js) — aqui só registramos os metadados.
       const { funcionario_id } = req.query;
       if (!funcionario_id) return res.status(400).json({ error: 'funcionario_id obrigatório' });
 
-      const bb = Busboy({ headers: req.headers });
-      let fileBuffer = null;
-      let fileName = '';
-      let mimeType = 'application/octet-stream';
-
-      await new Promise((resolve, reject) => {
-        bb.on('file', (name, file, info) => {
-          const raw = info.filename || 'arquivo';
-          fileName = raw.replace(/[\u{FEFF}\u{200B}-\u{200D}\u{FFFE}\u{FFFF}]/gu, '').replace(/[^\w.\-() ]/g, '_').trim() || 'arquivo';
-          mimeType = info.mimeType || 'application/octet-stream';
-          const chunks = [];
-          file.on('data', chunk => chunks.push(chunk));
-          file.on('end', () => { fileBuffer = Buffer.concat(chunks); });
-        });
-        bb.on('finish', resolve);
-        bb.on('error', reject);
-        req.pipe(bb);
-      });
-
-      if (!fileBuffer) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
-
-      const blob = await put(
-        `sst/${funcionario_id}/${Date.now()}-${fileName}`,
-        fileBuffer,
-        { access: 'public', contentType: mimeType }
-      );
+      const { nome, tipo, url, tamanho } = req.body || {};
+      if (!url) return res.status(400).json({ error: 'url do arquivo obrigatória' });
+      if (!url.startsWith('https://') || !url.includes('.public.blob.vercel-storage.com/')) {
+        return res.status(400).json({ error: 'url inválida' });
+      }
 
       const [doc] = await sql`
         INSERT INTO documentos (funcionario_id, nome, tipo, url, tamanho)
-        VALUES (${funcionario_id}, ${fileName}, ${mimeType}, ${blob.url}, ${fileBuffer.length})
+        VALUES (${funcionario_id}, ${nome || 'arquivo'}, ${tipo || 'application/octet-stream'}, ${url}, ${tamanho || null})
         RETURNING *
       `;
       return res.json(doc);

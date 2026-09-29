@@ -767,9 +767,9 @@
     <div class="doc-upload-area" onclick="document.getElementById('doc-file-input').click()">
       <i class="fa-solid fa-cloud-arrow-up"></i>
       <p>Clique para anexar documento</p>
-      <span>Fotos, PDF, Word, Excel — máx. 10 MB</span>
+      <span>Fotos, PDF, Word, Excel — máx. 20 MB por arquivo (pode selecionar vários)</span>
     </div>
-    <input type="file" id="doc-file-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none" onchange="uploadDoc(this)"/>
+    <input type="file" id="doc-file-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" multiple style="display:none" onchange="uploadDoc(this)"/>
     <div id="doc-list"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('documentos')">Fechar</button>
@@ -778,6 +778,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script type="module">
+  import { upload } from 'https://esm.sh/@vercel/blob@0.27.3/client';
+  window.blobUpload = upload;
+</script>
 <script>
 // ── AUTH ──
 if (!localStorage.getItem('sst_token')) window.location.href = '/';
@@ -1505,19 +1509,36 @@ async function renderDocs() {
   }).join('');
 }
 async function uploadDoc(input) {
-  const file=input.files[0]; if(!file)return;
-  if(file.size>10*1024*1024){alert('Arquivo muito grande. Máximo 10 MB.');input.value='';return;}
+  const files=[...input.files]; if(!files.length)return;
+  const MAX=20*1024*1024;
+  const tooBig=files.filter(f=>f.size>MAX);
+  if(tooBig.length){alert(`Arquivo(s) muito grande(s) (máx. 20 MB): ${tooBig.map(f=>f.name).join(', ')}`);input.value='';return;}
   const fid=document.getElementById('doc-func-id').value;
   const prog=document.getElementById('doc-uploading');
   prog.style.display='flex';
-  try{
-    const form=new FormData(); form.append('file',file);
-    const r=await fetch('/api/documentos?funcionario_id='+fid,{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('sst_token')},body:form});
-    if(!r.ok){const e=await r.json();throw new Error(e.error||'Erro ao enviar');}
-    input.value='';
-    await renderDocs();
-  }catch(e){alert(e.message);}
+  const failed=[];
+  for(let i=0;i<files.length;i++){
+    const file=files[i];
+    prog.innerHTML=`<i class="fa-solid fa-spinner fa-spin"></i> Enviando ${i+1} de ${files.length}: ${file.name}`;
+    try{
+      const blob=await window.blobUpload(file.name,file,{
+        access:'public',
+        handleUploadUrl:'/api/upload-url',
+        clientPayload:JSON.stringify({funcionario_id:fid}),
+      });
+      const r=await fetch('/api/documentos?funcionario_id='+fid,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('sst_token')},
+        body:JSON.stringify({nome:file.name,tipo:file.type,url:blob.url,tamanho:file.size}),
+      });
+      if(!r.ok){const e=await r.json();throw new Error(e.error||'Erro ao enviar');}
+    }catch(e){failed.push(`${file.name}: ${e.message}`);}
+  }
+  input.value='';
+  await renderDocs();
   prog.style.display='none';
+  prog.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Enviando arquivo...';
+  if(failed.length) alert('Alguns arquivos falharam:\n'+failed.join('\n'));
 }
 async function delDoc(id){
   if(!confirm('Remover este documento?'))return;
