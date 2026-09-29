@@ -1524,7 +1524,7 @@ async function uploadDoc(input) {
       const blob=await window.blobUpload(file.name,file,{
         access:'public',
         handleUploadUrl:'/api/upload-url',
-        clientPayload:JSON.stringify({funcionario_id:fid}),
+        clientPayload:JSON.stringify({funcionario_id:fid,token:localStorage.getItem('sst_token')}),
       });
       const r=await fetch('/api/documentos?funcionario_id='+fid,{
         method:'POST',

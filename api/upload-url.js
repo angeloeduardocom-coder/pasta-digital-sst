@@ -1,5 +1,7 @@
+const jwt = require('jsonwebtoken');
 const { handleUpload } = require('@vercel/blob/client');
-const { requireAuth } = require('../lib/auth');
+
+const SECRET = process.env.JWT_SECRET || 'dev-secret';
 
 const ALLOWED_TYPES = [
   'image/*',
@@ -12,18 +14,24 @@ const ALLOWED_TYPES = [
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
-  if (!requireAuth(req, res)) return;
 
   try {
     const jsonResponse = await handleUpload({
       body: req.body,
       request: req,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
-        let funcionarioId = null;
+        let payload;
         try {
-          funcionarioId = JSON.parse(clientPayload || '{}').funcionario_id;
-        } catch (_) {}
-        if (!funcionarioId) throw new Error('funcionario_id obrigatório');
+          payload = JSON.parse(clientPayload || '{}');
+        } catch (_) {
+          throw new Error('clientPayload inválido');
+        }
+        if (!payload.funcionario_id) throw new Error('funcionario_id obrigatório');
+        try {
+          jwt.verify(payload.token, SECRET);
+        } catch (_) {
+          throw new Error('Não autorizado');
+        }
         return {
           allowedContentTypes: ALLOWED_TYPES,
           maximumSizeInBytes: 20 * 1024 * 1024,
