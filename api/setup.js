@@ -91,6 +91,25 @@ module.exports = async (req, res) => {
       )
     `;
 
+    await sql`
+      CREATE TABLE IF NOT EXISTS investigacoes (
+        id SERIAL PRIMARY KEY,
+        acidente_id INTEGER UNIQUE NOT NULL REFERENCES acidentes(id) ON DELETE CASCADE,
+        data_investigacao DATE,
+        responsavel VARCHAR(255),
+        metodo VARCHAR(100),
+        fatos_apurados TEXT,
+        causas_imediatas TEXT,
+        causas_basicas TEXT,
+        acoes_corretivas TEXT,
+        resp_acoes VARCHAR(255),
+        prazo_acoes DATE,
+        conclusao TEXT,
+        status VARCHAR(50) DEFAULT 'Em andamento',
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
+
     // Cria os 2 usuários padrão se não existirem
     const usuarios = [
       { username: 'tecnico1', password: 'sst@2025' },

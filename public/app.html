@@ -163,8 +163,9 @@
     .mtag i { font-size:16px; color:var(--primary); }
     .field { margin-bottom:15px; }
     .field label { display:block; font-size:11.5px; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:7px; }
-    .field input, .field select { width:100%; padding:10px 13px; border:1.5px solid var(--border); border-radius:9px; font-size:14px; color:var(--t1); background:var(--surface); outline:none; font-family:inherit; font-weight:500; transition:border-color .15s,box-shadow .15s; }
-    .field input:focus, .field select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(22,163,74,.12); }
+    .field input, .field select, .field textarea { width:100%; padding:10px 13px; border:1.5px solid var(--border); border-radius:9px; font-size:14px; color:var(--t1); background:var(--surface); outline:none; font-family:inherit; font-weight:500; transition:border-color .15s,box-shadow .15s; }
+    .field textarea { resize:vertical; min-height:64px; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(22,163,74,.12); }
     .field input::placeholder { color:var(--t3); font-weight:400; }
     .frow { display:flex; gap:12px; }
     .frow .field { flex:1; }
@@ -329,6 +330,9 @@
     <div class="sb-section">Registros</div>
     <div class="nav-item" onclick="go('inspecoes',this)">
       <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Inspeções / Acidentes
+    </div>
+    <div class="nav-item" onclick="go('investigacoes',this)">
+      <span class="nav-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></span> Relatório de Investigação + CAT
     </div>
   </div>
   <div class="sb-footer">
@@ -502,6 +506,21 @@
           <div id="empty-ac" class="empty" style="display:none"><span class="ei"><i class="fa-solid fa-triangle-exclamation"></i></span><p>Nenhum acidente registrado.</p></div>
           <div class="tfoot"><span id="ac-cnt">0 registros</span></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATÓRIO DE INVESTIGAÇÃO + CAT -->
+  <div id="page-investigacoes" class="page">
+    <div class="topbar">
+      <div class="topbar-left"><h2>Relatório de Investigação + CAT</h2><div class="sub">Análise de causas e ações corretivas por acidente registrado</div></div>
+    </div>
+    <div class="page-body">
+      <div class="tcard">
+        <div class="tcard-toolbar"><h3>Investigações</h3><div class="search-box"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" placeholder="Buscar..." oninput="renderInv(this.value)"/></div></div>
+        <div class="table-scroll"><table><thead><tr><th>#</th><th>Funcionário</th><th>Data do acidente</th><th>CAT</th><th>Investigação</th><th></th></tr></thead><tbody id="tbody-inv"></tbody></table></div>
+        <div id="empty-inv" class="empty" style="display:none"><span class="ei"><i class="fa-solid fa-magnifying-glass-chart"></i></span><p>Nenhum acidente registrado ainda. Registre em "Inspeções / Acidentes" primeiro.</p></div>
+        <div class="tfoot"><span id="inv-cnt">0 registros</span></div>
       </div>
     </div>
   </div>
@@ -685,6 +704,35 @@
   </div>
 </div>
 
+<div class="overlay" id="modal-investigacao">
+  <div class="modal" style="width:560px">
+    <div class="modal-title"><div class="mtag" style="background:#FEE2E2"><i class="fa-solid fa-magnifying-glass-chart" style="color:var(--red)"></i></div> Investigação de Acidente</div>
+    <div class="sub" id="inv-acidente-label" style="margin:-6px 0 14px;font-size:12.5px;color:var(--t2)"></div>
+    <input type="hidden" id="inv-acidente-id"/>
+    <div class="frow">
+      <div class="field"><label>Data da investigação</label><input type="date" id="inv-data"/></div>
+      <div class="field"><label>Responsável técnico</label><input type="text" id="inv-resp" placeholder="Nome do responsável"/></div>
+    </div>
+    <div class="field"><label>Método de análise</label><select id="inv-metodo"><option>Árvore de causas</option><option>5 porquês</option><option>Ishikawa (espinha de peixe)</option><option>Outro</option></select></div>
+    <div class="field"><label>Fatos apurados</label><textarea id="inv-fatos" rows="2" placeholder="O que foi constatado na investigação"></textarea></div>
+    <div class="frow">
+      <div class="field"><label>Causas imediatas</label><textarea id="inv-causas-im" rows="2" placeholder="Atos e condições inseguras"></textarea></div>
+      <div class="field"><label>Causas básicas</label><textarea id="inv-causas-bas" rows="2" placeholder="Fatores pessoais e de trabalho"></textarea></div>
+    </div>
+    <div class="field"><label>Ações corretivas</label><textarea id="inv-acoes" rows="2"></textarea></div>
+    <div class="frow">
+      <div class="field"><label>Responsável pelas ações</label><input type="text" id="inv-resp-acoes"/></div>
+      <div class="field"><label>Prazo das ações</label><input type="date" id="inv-prazo"/></div>
+    </div>
+    <div class="field"><label>Conclusão</label><textarea id="inv-conclusao" rows="2"></textarea></div>
+    <div class="field"><label>Status</label><select id="inv-status"><option>Em andamento</option><option>Concluída</option></select></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('investigacao')">Cancelar</button>
+      <button class="btn-save" onclick="saveInv()">Salvar Investigação</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="modal-visualizar">
   <div class="modal" style="width:440px">
     <div class="modal-title"><div class="mtag"><i class="fa-solid fa-eye"></i></div> <span id="vz-nome">Colaborador</span></div>
@@ -832,7 +880,7 @@ function go(page, el) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   el.classList.add('active');
-  ({inicio:renderInicio,treinamentos:renderT,extintores:renderEx,funcionarios:renderF,inspecoes:()=>{renderI();renderAc();}})[page]();
+  ({inicio:renderInicio,treinamentos:renderT,extintores:renderEx,funcionarios:renderF,inspecoes:()=>{renderI();renderAc();},investigacoes:renderInv})[page]();
 }
 
 // ── DASHBOARD ──
@@ -1295,6 +1343,61 @@ async function saveAc(){
   try{await API.post('acidentes',{func,data,tipo:document.getElementById('ac-tipo').value,descricao:document.getElementById('ac-desc').value,cat:document.getElementById('ac-cat').value});closeModal('acidente');renderAc();}catch(e){alert(e.message);}
 }
 async function delAc(id){if(!confirm('Remover?'))return;await API.del('acidentes',id);renderAc();}
+
+// ── INVESTIGAÇÕES ──
+let _invByAcidente={}, _invAcList=[];
+async function renderInv(search=''){
+  const [acs,invs]=await Promise.all([API.get('acidentes'),API.get('investigacoes')]);
+  _invAcList=acs; _invByAcidente={}; invs.forEach(i=>_invByAcidente[i.acidente_id]=i);
+  const list=acs.filter(r=>(r.func+(r.tipo||'')).toLowerCase().includes((search||'').toLowerCase()));
+  const tbody=document.getElementById('tbody-inv'), empty=document.getElementById('empty-inv');
+  document.getElementById('inv-cnt').textContent=`${list.length} registros`;
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  const cc={Sim:'b-ok','Em processo':'b-alert','Não':'b-exp'};
+  const sc={'Concluída':'b-ok','Em andamento':'b-alert'};
+  tbody.innerHTML=list.map((r,i)=>{
+    const inv=_invByAcidente[r.id];
+    const statusBadge=inv?`<span class="badge ${sc[inv.status]||'b-alert'}"><span class="dot"></span>${inv.status}</span>`:`<span class="badge b-exp"><span class="dot"></span>Não iniciada</span>`;
+    return `<tr><td><div class="rn">${String(i+1).padStart(2,'0')}</div></td><td><strong style="font-weight:600">${r.func}</strong></td><td style="color:var(--t2);white-space:nowrap">${fmt(r.data)}</td><td><span class="badge ${cc[r.cat]||'b-alert'}"><span class="dot"></span>${r.cat||'—'}</span></td><td>${statusBadge}</td><td style="display:flex;gap:6px"><button class="ab" title="${inv?'Editar investigação':'Investigar'}" onclick="openInvestigar(${r.id})"><i class="fa-solid fa-magnifying-glass-chart"></i></button></td></tr>`;
+  }).join('');
+}
+function openInvestigar(acidenteId){
+  const acc=_invAcList.find(a=>a.id===acidenteId);
+  const inv=_invByAcidente[acidenteId];
+  document.getElementById('inv-acidente-id').value=acidenteId;
+  document.getElementById('inv-acidente-label').textContent=acc?`${acc.func} · ${fmt(acc.data)}`:'';
+  document.getElementById('inv-data').value=inv?toISO(inv.data_investigacao):'';
+  document.getElementById('inv-resp').value=inv?.responsavel||'';
+  document.getElementById('inv-metodo').value=inv?.metodo||'Árvore de causas';
+  document.getElementById('inv-fatos').value=inv?.fatos_apurados||'';
+  document.getElementById('inv-causas-im').value=inv?.causas_imediatas||'';
+  document.getElementById('inv-causas-bas').value=inv?.causas_basicas||'';
+  document.getElementById('inv-acoes').value=inv?.acoes_corretivas||'';
+  document.getElementById('inv-resp-acoes').value=inv?.resp_acoes||'';
+  document.getElementById('inv-prazo').value=inv?toISO(inv.prazo_acoes):'';
+  document.getElementById('inv-conclusao').value=inv?.conclusao||'';
+  document.getElementById('inv-status').value=inv?.status||'Em andamento';
+  document.getElementById('modal-investigacao').classList.add('open');
+}
+async function saveInv(){
+  const acidente_id=Number(document.getElementById('inv-acidente-id').value);
+  const body={
+    acidente_id,
+    data_investigacao:document.getElementById('inv-data').value||null,
+    responsavel:document.getElementById('inv-resp').value,
+    metodo:document.getElementById('inv-metodo').value,
+    fatos_apurados:document.getElementById('inv-fatos').value,
+    causas_imediatas:document.getElementById('inv-causas-im').value,
+    causas_basicas:document.getElementById('inv-causas-bas').value,
+    acoes_corretivas:document.getElementById('inv-acoes').value,
+    resp_acoes:document.getElementById('inv-resp-acoes').value,
+    prazo_acoes:document.getElementById('inv-prazo').value||null,
+    conclusao:document.getElementById('inv-conclusao').value,
+    status:document.getElementById('inv-status').value,
+  };
+  try{await API.post('investigacoes',body);closeModal('investigacao');renderInv();}catch(e){alert(e.message);}
+}
 
 // ── RESIZE ──
 function noSelect(on){const v=on?'none':'';document.body.style.userSelect=v;document.body.style.webkitUserSelect=v;document.body.style.cursor=on?'col-resize':'';if(on)window.getSelection()?.removeAllRanges();}
