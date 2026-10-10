@@ -1,5 +1,6 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
+const { maiusculo } = require('../lib/maiusculo');
 
 module.exports = async (req, res) => {
   if (!requireAuth(req, res)) return;
@@ -11,7 +12,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { local, data, resp, res: resultado, obs } = req.body;
+      const { local, data, resp, res: resultado, obs } = maiusculo(req.body, ['local','resp','obs']);
       if (!local || !data) return res.status(400).json({ error: 'Local e data obrigatórios' });
       const [row] = await sql`
         INSERT INTO inspecoes (local, data, resp, res, obs)

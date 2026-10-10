@@ -1,5 +1,6 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
+const { maiusculo } = require('../lib/maiusculo');
 
 module.exports = async (req, res) => {
   if (!requireAuth(req, res)) return;
@@ -11,7 +12,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { func, data, tipo, descricao, cat } = req.body;
+      const { func, data, tipo, descricao, cat } = maiusculo(req.body, ['func','descricao']);
       if (!func || !data) return res.status(400).json({ error: 'Funcionário e data obrigatórios' });
       const [row] = await sql`
         INSERT INTO acidentes (func, data, tipo, descricao, cat)

@@ -110,6 +110,18 @@ module.exports = async (req, res) => {
       )
     `;
 
+    // Padroniza em MAIÚSCULO os textos já cadastrados (pode rodar várias vezes)
+    await sql`ALTER TABLE funcionarios ADD COLUMN IF NOT EXISTS empregador VARCHAR(255)`;
+    await sql`ALTER TABLE funcionarios ADD COLUMN IF NOT EXISTS contato VARCHAR(50)`;
+    await sql`ALTER TABLE funcionarios ADD COLUMN IF NOT EXISTS matricula VARCHAR(50)`;
+    await sql`ALTER TABLE funcionarios ADD COLUMN IF NOT EXISTS supervisor VARCHAR(255)`;
+    await sql`UPDATE funcionarios SET nome=UPPER(nome), cargo=UPPER(cargo), setor=UPPER(setor), empregador=UPPER(empregador), contato=UPPER(contato), matricula=UPPER(matricula), supervisor=UPPER(supervisor)`;
+    await sql`UPDATE treinamentos SET nome=UPPER(nome)`;
+    await sql`UPDATE extintores SET id_num=UPPER(id_num), local=UPPER(local), obs=UPPER(obs)`;
+    await sql`UPDATE inspecoes SET local=UPPER(local), resp=UPPER(resp), obs=UPPER(obs)`;
+    await sql`UPDATE acidentes SET func=UPPER(func), descricao=UPPER(descricao)`;
+    await sql`UPDATE investigacoes SET responsavel=UPPER(responsavel), fatos_apurados=UPPER(fatos_apurados), causas_imediatas=UPPER(causas_imediatas), causas_basicas=UPPER(causas_basicas), acoes_corretivas=UPPER(acoes_corretivas), resp_acoes=UPPER(resp_acoes), conclusao=UPPER(conclusao)`;
+
     // Cria os 2 usuários padrão se não existirem
     const usuarios = [
       { username: 'tecnico1', password: 'sst@2025' },
