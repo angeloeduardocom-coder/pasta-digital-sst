@@ -1,5 +1,6 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
+const { maiusculo } = require('../lib/maiusculo');
 
 module.exports = async (req, res) => {
   if (!requireAuth(req, res)) return;
@@ -16,7 +17,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { nome, cargo, setor, adm, status, empregador, contato, matricula, supervisor } = req.body;
+      const { nome, cargo, setor, adm, status, empregador, contato, matricula, supervisor } = maiusculo(req.body, ['nome','cargo','setor','empregador','contato','matricula','supervisor']);
       if (!nome) return res.status(400).json({ error: 'Nome obrigatório' });
       const [row] = await sql`
         INSERT INTO funcionarios (nome, cargo, setor, adm, status, empregador, contato, matricula, supervisor)
@@ -28,7 +29,7 @@ module.exports = async (req, res) => {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const { nome, cargo, setor, adm, status, empregador, contato, matricula, supervisor } = req.body;
+      const { nome, cargo, setor, adm, status, empregador, contato, matricula, supervisor } = maiusculo(req.body, ['nome','cargo','setor','empregador','contato','matricula','supervisor']);
       const [row] = await sql`
         UPDATE funcionarios SET nome=${nome}, cargo=${cargo||null}, setor=${setor||null},
           adm=${adm||null}, status=${status||'Ativo'}, empregador=${empregador||null},

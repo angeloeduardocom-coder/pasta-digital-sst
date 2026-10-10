@@ -1,5 +1,6 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
+const { maiusculo } = require('../lib/maiusculo');
 
 function calcProx(ult, per) {
   if (!ult) return null;
@@ -43,7 +44,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { nome, cat, per, ult, prox, ch, funcs } = req.body;
+      const { nome, cat, per, ult, prox, ch, funcs } = maiusculo(req.body, ['nome']);
       if (!nome) return res.status(400).json({ error: 'Nome obrigatório' });
 
       const [existing] = await sql`SELECT id FROM treinamentos WHERE LOWER(nome) = LOWER(${nome}) LIMIT 1`;
@@ -87,7 +88,7 @@ module.exports = async (req, res) => {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const { nome, cat, per, ult, prox, ch, funcs } = req.body;
+      const { nome, cat, per, ult, prox, ch, funcs } = maiusculo(req.body, ['nome']);
       if (!id) return res.status(400).json({ error: 'ID obrigatório' });
 
       const proxFinal = prox || (ult ? calcProx(ult, per || 'Anual') : null);

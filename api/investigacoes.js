@@ -1,5 +1,6 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
+const { maiusculo } = require('../lib/maiusculo');
 
 module.exports = async (req, res) => {
   if (!requireAuth(req, res)) return;
@@ -15,7 +16,7 @@ module.exports = async (req, res) => {
         acidente_id, data_investigacao, responsavel, metodo,
         fatos_apurados, causas_imediatas, causas_basicas,
         acoes_corretivas, resp_acoes, prazo_acoes, conclusao, status,
-      } = req.body;
+      } = maiusculo(req.body, ['responsavel','fatos_apurados','causas_imediatas','causas_basicas','acoes_corretivas','resp_acoes','conclusao']);
       if (!acidente_id) return res.status(400).json({ error: 'Acidente é obrigatório' });
 
       const [row] = await sql`

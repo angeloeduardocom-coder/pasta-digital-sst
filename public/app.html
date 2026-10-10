@@ -167,6 +167,8 @@
     .field textarea { resize:vertical; min-height:64px; }
     .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(22,163,74,.12); }
     .field input::placeholder { color:var(--t3); font-weight:400; }
+    .field input[type=text], .field textarea { text-transform:uppercase; }
+    .field input[type=text]::placeholder, .field textarea::placeholder { text-transform:none; }
     .frow { display:flex; gap:12px; }
     .frow .field { flex:1; }
     .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
@@ -597,12 +599,12 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><label style="margin-bottom:0">Treinamento</label><button type="button" id="btn-criar-novo" onclick="toggleCriarNovo()" style="background:none;border:none;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0"><i class="fa-solid fa-plus"></i> Criar novo</button></div>
       <select id="t-nome" onchange="document.getElementById('t-outro-w').style.display=this.value==='Outro'?'block':'none';if(this.value!=='Outro'){document.getElementById('btn-criar-novo').innerHTML='<i class=\'fa-solid fa-plus\'></i> Criar novo';}">
         <option value="">Selecione...</option>
-        <option>NR-05 – CIPA</option><option>NR-06 – EPI</option><option>NR-10 – Instalações Elétricas</option>
-        <option>NR-11 – Transporte e Armazenagem</option><option>NR-12 – Máquinas e Equipamentos</option>
-        <option>NR-18 – Construção Civil</option><option>NR-20 – Inflamáveis e Combustíveis</option>
-        <option>NR-23 – Combate a Incêndio</option><option>NR-33 – Espaço Confinado</option>
-        <option>NR-35 – Trabalho em Altura</option><option>Direção Defensiva</option>
-        <option>Primeiros Socorros</option><option>Integração de Segurança</option><option>Outro</option>
+        <option>NR-05 – CIPA</option><option>NR-06 – EPI</option><option>NR-10 – INSTALAÇÕES ELÉTRICAS</option>
+        <option>NR-11 – TRANSPORTE E ARMAZENAGEM</option><option>NR-12 – MÁQUINAS E EQUIPAMENTOS</option>
+        <option>NR-18 – CONSTRUÇÃO CIVIL</option><option>NR-20 – INFLAMÁVEIS E COMBUSTÍVEIS</option>
+        <option>NR-23 – COMBATE A INCÊNDIO</option><option>NR-33 – ESPAÇO CONFINADO</option>
+        <option>NR-35 – TRABALHO EM ALTURA</option><option>DIREÇÃO DEFENSIVA</option>
+        <option>PRIMEIROS SOCORROS</option><option>INTEGRAÇÃO DE SEGURANÇA</option><option value="Outro">OUTRO</option>
       </select>
     </div>
     <div class="field" id="t-outro-w" style="display:none"><label>Nome do treinamento</label><input type="text" id="t-outro" placeholder="Ex: Treinamento de PCMSO"/></div>
@@ -986,7 +988,7 @@ async function openModal(tipo) {
     document.getElementById('t-cat').value='NR';
     document.getElementById('t-per').value='Anual';
     document.getElementById('t-ch').value='';
-    const _predefinidos=['NR-05 – CIPA','NR-06 – EPI','NR-10 – Instalações Elétricas','NR-11 – Transporte e Armazenagem','NR-12 – Máquinas e Equipamentos','NR-18 – Construção Civil','NR-20 – Inflamáveis e Combustíveis','NR-23 – Combate a Incêndio','NR-33 – Espaço Confinado','NR-35 – Trabalho em Altura','Direção Defensiva','Primeiros Socorros','Integração de Segurança'];
+    const _predefinidos=['NR-05 – CIPA','NR-06 – EPI','NR-10 – INSTALAÇÕES ELÉTRICAS','NR-11 – TRANSPORTE E ARMAZENAGEM','NR-12 – MÁQUINAS E EQUIPAMENTOS','NR-18 – CONSTRUÇÃO CIVIL','NR-20 – INFLAMÁVEIS E COMBUSTÍVEIS','NR-23 – COMBATE A INCÊNDIO','NR-33 – ESPAÇO CONFINADO','NR-35 – TRABALHO EM ALTURA','DIREÇÃO DEFENSIVA','PRIMEIROS SOCORROS','INTEGRAÇÃO DE SEGURANÇA'];
     const selT=document.getElementById('t-nome');
     selT.querySelectorAll('option[data-custom]').forEach(o=>o.remove());
     const customNames=[...new Set((_cachedT||[]).map(t=>t.nome).filter(n=>!_predefinidos.includes(n)))];
@@ -1083,7 +1085,7 @@ async function editT(id){
   document.getElementById('t-edit-id').value=r.id;
   document.getElementById('btn-criar-novo').innerHTML='<i class="fa-solid fa-plus"></i> Criar novo';
   const nomeSel=document.getElementById('t-nome');
-  const _predefinidos=['NR-05 – CIPA','NR-06 – EPI','NR-10 – Instalações Elétricas','NR-11 – Transporte e Armazenagem','NR-12 – Máquinas e Equipamentos','NR-18 – Construção Civil','NR-20 – Inflamáveis e Combustíveis','NR-23 – Combate a Incêndio','NR-33 – Espaço Confinado','NR-35 – Trabalho em Altura','Direção Defensiva','Primeiros Socorros','Integração de Segurança'];
+  const _predefinidos=['NR-05 – CIPA','NR-06 – EPI','NR-10 – INSTALAÇÕES ELÉTRICAS','NR-11 – TRANSPORTE E ARMAZENAGEM','NR-12 – MÁQUINAS E EQUIPAMENTOS','NR-18 – CONSTRUÇÃO CIVIL','NR-20 – INFLAMÁVEIS E COMBUSTÍVEIS','NR-23 – COMBATE A INCÊNDIO','NR-33 – ESPAÇO CONFINADO','NR-35 – TRABALHO EM ALTURA','DIREÇÃO DEFENSIVA','PRIMEIROS SOCORROS','INTEGRAÇÃO DE SEGURANÇA'];
   nomeSel.querySelectorAll('option[data-custom]').forEach(o=>o.remove());
   const customNames=[...new Set((_cachedT||[]).map(t=>t.nome).filter(n=>!_predefinidos.includes(n)))];
   const outroOpt=[...nomeSel.options].find(o=>o.value==='Outro');
@@ -1547,6 +1549,17 @@ async function delDoc(id){
 }
 
 renderInicio();
+</script>
+<script>
+// Padrão do sistema: todo texto digitado nos formulários fica em MAIÚSCULO.
+document.addEventListener('input',function(e){
+  var el=e.target;
+  if(!el||!el.closest||!el.closest('.field'))return;
+  var ok=(el.tagName==='TEXTAREA')||(el.tagName==='INPUT'&&el.type==='text');
+  if(!ok)return;
+  var up=el.value.toLocaleUpperCase('pt-BR');
+  if(up!==el.value){var a=el.selectionStart,b=el.selectionEnd;el.value=up;try{el.setSelectionRange(a,b);}catch(_){}}
+},true);
 </script>
 </body>
 </html>

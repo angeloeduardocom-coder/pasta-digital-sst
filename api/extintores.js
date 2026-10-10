@@ -1,5 +1,6 @@
 const sql = require('../lib/db');
 const { requireAuth } = require('../lib/auth');
+const { maiusculo } = require('../lib/maiusculo');
 
 function calcProx(ult) {
   if (!ult) return null;
@@ -36,7 +37,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { id_num, tipo, cap, local, ult, prox, obs } = req.body;
+      const { id_num, tipo, cap, local, ult, prox, obs } = maiusculo(req.body, ['id_num','local','obs']);
       if (!id_num) return res.status(400).json({ error: 'Identificação obrigatória' });
 
       const proxFinal = prox || calcProx(ult);
@@ -57,7 +58,7 @@ module.exports = async (req, res) => {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const { id_num, tipo, cap, local, ult, prox, obs } = req.body;
+      const { id_num, tipo, cap, local, ult, prox, obs } = maiusculo(req.body, ['id_num','local','obs']);
       if (!id || !id_num) return res.status(400).json({ error: 'ID e identificação obrigatórios' });
 
       const proxFinal = prox || calcProx(ult);
